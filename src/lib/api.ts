@@ -4,7 +4,8 @@ import type { Dentist, Order, Invoice, Patient, OrderStatus, OrderFile, UserProf
 
 async function getLabId(): Promise<string> {
   const { data: { user } } = await supabase.auth.getUser()
-  return user?.id ?? ''
+  if (!user) throw new Error('Non authentifié — veuillez vous reconnecter')
+  return user.id
 }
 
 // ── Profile ───────────────────────────────────────────────────────────────────
@@ -145,7 +146,8 @@ export async function createOrder(
     return order
   }
   const { data: { user } } = await supabase.auth.getUser()
-  const lab_id = user?.id ?? ''
+  if (!user) throw new Error('Non authentifié — veuillez vous reconnecter')
+  const lab_id = user.id
   const order_number = await nextOrderNumber()
   const insertData: Record<string, unknown> = { ...data, lab_id, order_number }
   if (!insertData.dentist_id) delete insertData.dentist_id
@@ -174,7 +176,8 @@ export async function createOrderAsDentist(
     return order
   }
   const { data: { user } } = await supabase.auth.getUser()
-  const dentist_user_id = user?.id ?? ''
+  if (!user) throw new Error('Non authentifié — veuillez vous reconnecter')
+  const dentist_user_id = user.id
 
   const { data: labProfile } = await supabase
     .from('profiles')
@@ -182,7 +185,8 @@ export async function createOrderAsDentist(
     .eq('role', 'lab_admin')
     .limit(1)
     .single()
-  const lab_id = labProfile?.id ?? ''
+  if (!labProfile) throw new Error('Aucun laboratoire trouvé — contactez votre administrateur')
+  const lab_id = labProfile.id
 
   const order_number = await nextOrderNumber()
   const insertData: Record<string, unknown> = { ...data, dentist_user_id, lab_id, order_number }

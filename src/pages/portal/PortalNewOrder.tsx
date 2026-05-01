@@ -70,7 +70,7 @@ export default function PortalNewOrder() {
         .join('\n\n')
 
       const order = await createOrderAsDentist({
-        dentist_id: form.dentist_id || '',
+        dentist_id: form.dentist_id,
         patient_name: form.patient_name,
         work_type: form.work_type as WorkType,
         material: form.material as Material,
