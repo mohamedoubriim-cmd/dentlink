@@ -474,6 +474,7 @@ export async function updateInvoiceStatus(id: string, status: Invoice['status'])
           title: 'Statut de facture mis à jour',
           message: `Facture ${invoice.invoice_number} (${invoice.total} MAD) — ${labels[status] ?? status}`,
           order_id: null,
+          invoice_id: id,
           read: false,
         })
       }
@@ -514,6 +515,7 @@ export async function createInvoice(data: Omit<Invoice, 'id' | 'invoice_number' 
         title: 'Nouvelle facture',
         message: `Facture ${created.invoice_number} — ${created.total} MAD TTC`,
         order_id: null,
+        invoice_id: created.id,
         read: false,
       })
     }

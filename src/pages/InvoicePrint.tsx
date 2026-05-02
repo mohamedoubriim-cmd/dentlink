@@ -8,10 +8,7 @@ export default function InvoicePrint() {
   const [invoice, setInvoice] = useState<Invoice | null>(null)
 
   useEffect(() => {
-    if (id) getInvoice(id).then((inv) => {
-      setInvoice(inv)
-      setTimeout(() => window.print(), 600)
-    })
+    if (id) getInvoice(id).then(setInvoice)
   }, [id])
 
   if (!invoice) return (
