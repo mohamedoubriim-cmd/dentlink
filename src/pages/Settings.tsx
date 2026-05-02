@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { User, Building2, Globe, Check } from 'lucide-react'
 import Card from '../components/ui/Card'
-import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
 import { useAuth } from '../contexts/AuthContext'
 import { useRTL } from '../contexts/RTLContext'
@@ -17,8 +16,6 @@ export default function Settings() {
   const { t, i18n } = useTranslation()
   const { user } = useAuth()
   const { isRTL } = useRTL()
-  const [saved, setSaved] = useState(false)
-
   const [labForm, setLabForm] = useState({
     name: 'Laboratoire Dentaire Central',
     address: '47 Avenue Hassan II, Casablanca',
@@ -26,11 +23,6 @@ export default function Settings() {
     email: 'contact@labo-dental.ma',
     city: 'Casablanca',
   })
-
-  const handleSaveLab = () => {
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2500)
-  }
 
   const Tab = ({
     icon,
@@ -105,6 +97,7 @@ export default function Settings() {
               label={t('settings.full_name')}
               defaultValue={user?.email?.split('@')[0] ?? 'Admin'}
               placeholder="Votre nom"
+              disabled
             />
             <Input
               label={t('auth.email')}
@@ -113,7 +106,6 @@ export default function Settings() {
               disabled
             />
           </div>
-          <Button className="mt-5">{t('settings.save_changes')}</Button>
         </Card>
       )}
 
@@ -145,11 +137,6 @@ export default function Settings() {
               value={labForm.address}
               onChange={(e) => setLabForm((p) => ({ ...p, address: e.target.value }))}
             />
-          </div>
-          <div className={`flex items-center gap-3 mt-5 ${isRTL ? 'flex-row-reverse' : ''}`}>
-            <Button onClick={handleSaveLab} icon={saved ? <Check size={16} /> : undefined}>
-              {saved ? t('settings.saved') : t('settings.save_changes')}
-            </Button>
           </div>
         </Card>
       )}
