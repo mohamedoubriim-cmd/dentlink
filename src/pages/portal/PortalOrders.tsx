@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
-import { Eye, Paperclip, Plus } from 'lucide-react'
-import Card from '../../components/ui/Card'
+import { Plus } from 'lucide-react'
 import Button from '../../components/ui/Button'
-import { StatusBadge } from '../../components/ui/Badge'
+import Modal from '../../components/ui/Modal'
+import OrdersTable from '../../components/ui/OrdersTable'
 import { PageSpinner } from '../../components/ui/Spinner'
-import { getOrders } from '../../lib/api'
-import type { Order, OrderStatus } from '../../types'
+import { getOrders, hideOrderForDentist } from '../../lib/api'
+import type { Order } from '../../types'
 import { useRTL } from '../../contexts/RTLContext'
 
 export default function PortalOrders() {
@@ -15,30 +15,48 @@ export default function PortalOrders() {
   const { isRTL } = useRTL()
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
+  const [hideId, setHideId] = useState<string | null>(null)
+  const [toast, setToast] = useState(false)
 
   useEffect(() => {
     getOrders().then((data) => { setOrders(data); setLoading(false) })
   }, [])
 
-  const statusLabels: Record<OrderStatus, string> = {
-    pending: t('status.pending'),
-    in_progress: t('status.in_progress'),
-    ready: t('status.ready'),
-    delivered: t('status.delivered'),
-    cancelled: t('status.cancelled'),
+  const counts = {
+    total:       orders.length,
+    pending:     orders.filter((o) => o.status === 'pending').length,
+    in_progress: orders.filter((o) => o.status === 'in_progress').length,
+    ready:       orders.filter((o) => o.status === 'ready').length,
   }
 
-  const counts = {
-    total: orders.length,
-    pending: orders.filter((o) => o.status === 'pending').length,
-    in_progress: orders.filter((o) => o.status === 'in_progress').length,
-    ready: orders.filter((o) => o.status === 'ready').length,
+  const handleHide = async () => {
+    if (!hideId) return
+    const id = hideId
+    setHideId(null)
+    // Optimistic UI : retirer immédiatement la ligne
+    const snapshot = orders
+    setOrders((prev) => prev.filter((o) => o.id !== id))
+    try {
+      await hideOrderForDentist(id)
+      setToast(true)
+      setTimeout(() => setToast(false), 3000)
+    } catch {
+      // Rollback si l'appel échoue
+      setOrders(snapshot)
+    }
   }
 
   if (loading) return <PageSpinner />
 
   return (
     <div className="space-y-5">
+      {/* Toast */}
+      {toast && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-slate-800 text-white text-sm px-5 py-2.5 rounded-xl shadow-lg pointer-events-none">
+          Commande masquée
+        </div>
+      )}
+
       <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
         <h1 className="text-xl font-bold text-slate-800">{t('orders.title')}</h1>
         <Link to="/portal/new">
@@ -46,13 +64,13 @@ export default function PortalOrders() {
         </Link>
       </div>
 
-      {/* Status summary */}
+      {/* Résumé par statut */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: 'Total', value: counts.total, color: 'bg-slate-100 text-slate-700' },
-          { label: t('status.pending'), value: counts.pending, color: 'bg-amber-100 text-amber-700' },
-          { label: t('status.in_progress'), value: counts.in_progress, color: 'bg-blue-100 text-blue-700' },
-          { label: t('status.ready'), value: counts.ready, color: 'bg-purple-100 text-purple-700' },
+          { label: 'Total',                    value: counts.total,       color: 'bg-slate-100 text-slate-700'  },
+          { label: t('status.pending'),        value: counts.pending,     color: 'bg-amber-100 text-amber-700'  },
+          { label: t('status.in_progress'),    value: counts.in_progress, color: 'bg-blue-100 text-blue-700'    },
+          { label: t('status.ready'),          value: counts.ready,       color: 'bg-purple-100 text-purple-700' },
         ].map((s) => (
           <div key={s.label} className={`rounded-xl p-3 text-center ${s.color}`}>
             <p className="text-2xl font-bold">{s.value}</p>
@@ -61,50 +79,32 @@ export default function PortalOrders() {
         ))}
       </div>
 
-      <Card padding={false}>
-        {orders.length === 0 ? (
-          <div className="py-16 text-center text-slate-400 text-sm space-y-3">
-            <p>{t('orders.no_orders')}</p>
-            <Link to="/portal/new">
-              <Button size="sm">{t('orders.new_order')}</Button>
-            </Link>
-          </div>
-        ) : (
-          <div className="divide-y divide-slate-100">
-            {orders.map((order) => (
-              <Link
-                key={order.id}
-                to={`/portal/orders/${order.id}`}
-                className={`flex items-center gap-4 px-5 py-4 hover:bg-slate-50 transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}
-              >
-                <div className="flex-1 min-w-0">
-                  <div className={`flex items-center gap-2 flex-wrap ${isRTL ? 'flex-row-reverse' : ''}`}>
-                    <span className="font-medium text-slate-800 text-sm">{order.patient_name}</span>
-                    <span className="text-xs text-slate-400 font-mono">#{order.order_number}</span>
-                    {(order.files?.length ?? 0) > 0 && (
-                      <span className={`inline-flex items-center gap-1 text-xs text-primary-600 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                        <Paperclip size={11} />
-                        {order.files?.length}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-xs text-slate-400 mt-0.5">
-                    {t(`work_types.${order.work_type}`)} · {t(`materials.${order.material}`)}
-                    {order.shade ? ` · ${order.shade}` : ''}
-                  </p>
-                  <p className="text-xs text-slate-400 mt-0.5">
-                    {t('orders.due_date')}: {new Date(order.due_date).toLocaleDateString(isRTL ? 'ar-MA' : 'fr-FR')}
-                  </p>
-                </div>
-                <div className={`flex items-center gap-3 shrink-0 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                  <StatusBadge status={order.status} label={statusLabels[order.status]} />
-                  <Eye size={15} className="text-slate-300" />
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
-      </Card>
+      <OrdersTable
+        orders={orders}
+        showDentistColumn={false}
+        detailBasePath="/portal/orders"
+        onTrashClick={(id) => setHideId(id)}
+      />
+
+      {/* Modal confirmation "Masquer" */}
+      <Modal
+        open={!!hideId}
+        onClose={() => setHideId(null)}
+        title="Masquer cette commande ?"
+        maxWidth="sm"
+      >
+        <p className="text-sm text-slate-600 mb-6">
+          Cette commande sera retirée de votre liste mais restera visible pour le laboratoire.
+        </p>
+        <div className={`flex gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+          <Button variant="danger" onClick={handleHide} className="flex-1">
+            Masquer
+          </Button>
+          <Button variant="outline" onClick={() => setHideId(null)} className="flex-1">
+            Annuler
+          </Button>
+        </div>
+      </Modal>
     </div>
   )
 }

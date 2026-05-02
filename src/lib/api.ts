@@ -293,6 +293,16 @@ export async function updateTrackingNumber(id: string, tracking_number: string):
   await supabase.from('orders').update({ tracking_number }).eq('id', id)
 }
 
+export async function hideOrderForDentist(id: string): Promise<void> {
+  if (isMockMode) {
+    const idx = localOrders.findIndex((o) => o.id === id)
+    if (idx !== -1) localOrders[idx] = { ...localOrders[idx], hidden_for_dentist: true }
+    return
+  }
+  const { error } = await supabase.from('orders').update({ hidden_for_dentist: true }).eq('id', id)
+  if (error) throw new Error(error.message)
+}
+
 export async function updateOrderPrice(id: string, price: number): Promise<void> {
   if (isMockMode) {
     const idx = localOrders.findIndex((o) => o.id === id)

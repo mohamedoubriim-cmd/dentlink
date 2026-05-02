@@ -76,6 +76,7 @@ export interface Order {
   price: number
   notes?: string
   tracking_number?: string
+  hidden_for_dentist?: boolean
   files?: OrderFile[]
   created_at: string
   updated_at: string
