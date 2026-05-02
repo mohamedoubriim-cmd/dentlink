@@ -84,38 +84,58 @@ export default function Patients() {
         {filtered.length === 0 ? (
           <div className="py-16 text-center text-slate-400 text-sm">{t('patients.no_patients')}</div>
         ) : (
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-slate-100 bg-slate-50">
-                {[t('patients.name'), t('patients.age'), t('patients.gender'), t('patients.dentist')].map((h) => (
-                  <th key={h} className={`px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide ${isRTL ? 'text-right' : 'text-left'}`}>
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-50">
+          <>
+            {/* Mobile cards */}
+            <div className="md:hidden divide-y divide-slate-100">
               {filtered.map((p) => (
-                <tr key={p.id} className="hover:bg-slate-50">
-                  <td className={`px-4 py-3 ${isRTL ? 'text-right' : ''}`}>
-                    <div className={`flex items-center gap-2.5 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                      <div className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center">
-                        <User size={13} className="text-slate-400" />
-                      </div>
-                      <span className="font-medium text-slate-700">{p.name}</span>
-                    </div>
-                  </td>
-                  <td className={`px-4 py-3 text-slate-600 ${isRTL ? 'text-right' : ''}`}>{p.age}</td>
-                  <td className={`px-4 py-3 text-slate-600 ${isRTL ? 'text-right' : ''}`}>
-                    {t(`patients.${p.gender}`)}
-                  </td>
-                  <td className={`px-4 py-3 text-slate-600 ${isRTL ? 'text-right' : ''}`}>
-                    {p.dentist?.name ?? '—'}
-                  </td>
-                </tr>
+                <div key={p.id} className={`flex items-center gap-3 p-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                  <div className="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
+                    <User size={15} className="text-slate-400" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-slate-700">{p.name}</p>
+                    <p className="text-xs text-slate-400 mt-0.5">
+                      {p.age} · {t(`patients.${p.gender}`)} · {p.dentist?.name ?? '—'}
+                    </p>
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
+            </div>
+
+            {/* Desktop table */}
+            <table className="hidden md:table w-full text-sm">
+              <thead>
+                <tr className="border-b border-slate-100 bg-slate-50">
+                  {[t('patients.name'), t('patients.age'), t('patients.gender'), t('patients.dentist')].map((h) => (
+                    <th key={h} className={`px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide ${isRTL ? 'text-right' : 'text-left'}`}>
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50">
+                {filtered.map((p) => (
+                  <tr key={p.id} className="hover:bg-slate-50">
+                    <td className={`px-4 py-3 ${isRTL ? 'text-right' : ''}`}>
+                      <div className={`flex items-center gap-2.5 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                        <div className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center">
+                          <User size={13} className="text-slate-400" />
+                        </div>
+                        <span className="font-medium text-slate-700">{p.name}</span>
+                      </div>
+                    </td>
+                    <td className={`px-4 py-3 text-slate-600 ${isRTL ? 'text-right' : ''}`}>{p.age}</td>
+                    <td className={`px-4 py-3 text-slate-600 ${isRTL ? 'text-right' : ''}`}>
+                      {t(`patients.${p.gender}`)}
+                    </td>
+                    <td className={`px-4 py-3 text-slate-600 ${isRTL ? 'text-right' : ''}`}>
+                      {p.dentist?.name ?? '—'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </>
         )}
       </Card>
 

@@ -106,7 +106,7 @@ export default function NotificationBell({ orderBasePath = '/orders' }: Props) {
       </button>
 
       {open && (
-        <div className="absolute end-0 top-11 w-80 bg-white rounded-xl shadow-xl border border-slate-200 z-50 overflow-hidden">
+        <div className="fixed inset-x-2 top-16 sm:absolute sm:inset-auto sm:end-0 sm:top-11 sm:w-80 bg-white rounded-xl shadow-xl border border-slate-200 z-50 overflow-hidden">
           <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
             <h3 className="text-sm font-semibold text-slate-700">Notifications</h3>
             {unread > 0 && (

@@ -23,7 +23,7 @@ export default function PortalLayout() {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
       {/* Top bar */}
-      <header className={`h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 shrink-0 ${isRTL ? 'flex-row-reverse' : ''}`}>
+      <header className={`h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 shrink-0 ${isRTL ? 'flex-row-reverse' : ''}`}>
         {/* Logo */}
         <div className={`flex items-center gap-2.5 ${isRTL ? 'flex-row-reverse' : ''}`}>
           <div className="w-8 h-8 rounded-lg overflow-hidden">
@@ -67,7 +67,7 @@ export default function PortalLayout() {
       </header>
 
       {/* Nav tabs */}
-      <div className={`bg-white border-b border-slate-200 px-6 flex gap-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
+      <div className={`bg-white border-b border-slate-200 px-4 sm:px-6 flex gap-1 overflow-x-auto scrollbar-none ${isRTL ? 'flex-row-reverse' : ''}`}>
         <NavLink
           to="/portal"
           end
@@ -110,7 +110,7 @@ export default function PortalLayout() {
         </NavLink>
       </div>
 
-      <main className="flex-1 p-6 max-w-4xl mx-auto w-full">
+      <main className="flex-1 p-3 sm:p-6 max-w-4xl mx-auto w-full">
         <Outlet />
       </main>
     </div>

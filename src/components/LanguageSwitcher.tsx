@@ -49,8 +49,8 @@ export default function LanguageSwitcher({ variant = 'light' }: Props) {
 
       {open && (
         <div
-          className={`absolute top-full mt-1.5 w-44 bg-white border border-slate-200 rounded-xl shadow-lg z-50 py-1 ${
-            isRTL ? 'left-0' : 'right-0'
+          className={`fixed inset-x-2 top-16 sm:absolute sm:inset-auto sm:top-full sm:mt-1.5 sm:w-44 bg-white border border-slate-200 rounded-xl shadow-lg z-50 py-1 ${
+            isRTL ? 'sm:left-0' : 'sm:right-0'
           }`}
         >
           {languages.map((lang) => {

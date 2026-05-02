@@ -135,81 +135,129 @@ export default function Invoices() {
             <p className="text-sm">{t('invoices.no_invoices')}</p>
           </div>
         ) : (
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-slate-100 bg-slate-50">
-                {[
-                  t('invoices.invoice_number'),
-                  t('invoices.dentist'),
-                  t('invoices.date'),
-                  t('invoices.due_date'),
-                  t('invoices.amount'),
-                  t('invoices.total'),
-                  t('invoices.status'),
-                  '',
-                  '',
-                ].map((h, i) => (
-                  <th key={i} className={`px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide ${isRTL ? 'text-right' : 'text-left'}`}>
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-50">
+          <>
+            {/* Mobile cards */}
+            <div className="md:hidden divide-y divide-slate-100">
               {filtered.map((inv) => (
-                <tr key={inv.id} className={`hover:bg-slate-50 transition-colors ${inv.status === 'paid' ? 'opacity-70' : ''}`}>
-                  <td className={`px-4 py-3 font-mono text-xs text-slate-500 ${isRTL ? 'text-right' : ''}`}>
-                    {inv.invoice_number}
-                  </td>
-                  <td className={`px-4 py-3 font-medium text-slate-700 ${isRTL ? 'text-right' : ''}`}>
-                    {inv.dentist?.name ?? '—'}
-                  </td>
-                  <td className={`px-4 py-3 text-slate-600 ${isRTL ? 'text-right' : ''}`}>
-                    {new Date(inv.date).toLocaleDateString(isRTL ? 'ar-MA' : 'fr-FR')}
-                  </td>
-                  <td className={`px-4 py-3 text-slate-600 ${isRTL ? 'text-right' : ''}`}>
-                    {new Date(inv.due_date).toLocaleDateString(isRTL ? 'ar-MA' : 'fr-FR')}
-                  </td>
-                  <td className={`px-4 py-3 text-slate-600 ${isRTL ? 'text-right' : ''}`}>
-                    {inv.amount.toLocaleString()} {t('common.currency')}
-                  </td>
-                  <td className={`px-4 py-3 font-semibold text-slate-700 ${isRTL ? 'text-right' : ''}`}>
-                    {inv.total.toLocaleString()} {t('common.currency')}
-                  </td>
-                  <td className="px-4 py-3">
+                <div key={inv.id} className={`p-4 space-y-3 ${inv.status === 'paid' ? 'opacity-70' : ''}`}>
+                  <div className={`flex items-start justify-between gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <div>
+                      <p className="font-medium text-slate-800">{inv.dentist?.name ?? '—'}</p>
+                      <p className="text-xs font-mono text-slate-400 mt-0.5">{inv.invoice_number}</p>
+                    </div>
                     <InvoiceStatusBadge status={inv.status} label={t(`invoices.${inv.status}`)} />
-                  </td>
-                  <td className="px-4 py-3">
+                  </div>
+                  <div className="text-xs text-slate-500 space-y-1">
+                    <p>{new Date(inv.date).toLocaleDateString(isRTL ? 'ar-MA' : 'fr-FR')} → {new Date(inv.due_date).toLocaleDateString(isRTL ? 'ar-MA' : 'fr-FR')}</p>
+                    <p className="font-semibold text-slate-700 text-sm">{inv.total.toLocaleString()} {t('common.currency')}</p>
+                  </div>
+                  <div className={`flex gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     <button
                       onClick={() => downloadInvoicePdf(inv)}
-                      className="p-1.5 rounded-lg hover:bg-primary-50 text-slate-400 hover:text-primary-600 transition-colors"
+                      className="p-2 rounded-lg bg-primary-50 text-primary-600"
                       title="Télécharger PDF"
                     >
                       <Download size={15} />
                     </button>
-                  </td>
-                  <td className="px-4 py-3">
                     <button
                       onClick={() => handleTogglePaid(inv)}
                       disabled={togglingId === inv.id}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap ${
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                         inv.status === 'paid'
-                          ? 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                          : 'bg-green-50 text-green-700 hover:bg-green-100 border border-green-200'
+                          ? 'bg-slate-100 text-slate-600'
+                          : 'bg-green-50 text-green-700 border border-green-200'
                       }`}
                     >
-                      {togglingId === inv.id ? (
-                        <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                      ) : (
-                        <CheckCircle2 size={13} />
-                      )}
+                      {togglingId === inv.id
+                        ? <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                        : <CheckCircle2 size={13} />
+                      }
                       {inv.status === 'paid' ? 'Marquer impayé' : 'Marquer payé'}
                     </button>
-                  </td>
-                </tr>
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
+            </div>
+
+            {/* Desktop table */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-slate-100 bg-slate-50">
+                    {[
+                      t('invoices.invoice_number'),
+                      t('invoices.dentist'),
+                      t('invoices.date'),
+                      t('invoices.due_date'),
+                      t('invoices.amount'),
+                      t('invoices.total'),
+                      t('invoices.status'),
+                      '',
+                      '',
+                    ].map((h, i) => (
+                      <th key={i} className={`px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide ${isRTL ? 'text-right' : 'text-left'}`}>
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {filtered.map((inv) => (
+                    <tr key={inv.id} className={`hover:bg-slate-50 transition-colors ${inv.status === 'paid' ? 'opacity-70' : ''}`}>
+                      <td className={`px-4 py-3 font-mono text-xs text-slate-500 ${isRTL ? 'text-right' : ''}`}>
+                        {inv.invoice_number}
+                      </td>
+                      <td className={`px-4 py-3 font-medium text-slate-700 ${isRTL ? 'text-right' : ''}`}>
+                        {inv.dentist?.name ?? '—'}
+                      </td>
+                      <td className={`px-4 py-3 text-slate-600 ${isRTL ? 'text-right' : ''}`}>
+                        {new Date(inv.date).toLocaleDateString(isRTL ? 'ar-MA' : 'fr-FR')}
+                      </td>
+                      <td className={`px-4 py-3 text-slate-600 ${isRTL ? 'text-right' : ''}`}>
+                        {new Date(inv.due_date).toLocaleDateString(isRTL ? 'ar-MA' : 'fr-FR')}
+                      </td>
+                      <td className={`px-4 py-3 text-slate-600 ${isRTL ? 'text-right' : ''}`}>
+                        {inv.amount.toLocaleString()} {t('common.currency')}
+                      </td>
+                      <td className={`px-4 py-3 font-semibold text-slate-700 ${isRTL ? 'text-right' : ''}`}>
+                        {inv.total.toLocaleString()} {t('common.currency')}
+                      </td>
+                      <td className="px-4 py-3">
+                        <InvoiceStatusBadge status={inv.status} label={t(`invoices.${inv.status}`)} />
+                      </td>
+                      <td className="px-4 py-3">
+                        <button
+                          onClick={() => downloadInvoicePdf(inv)}
+                          className="p-1.5 rounded-lg hover:bg-primary-50 text-slate-400 hover:text-primary-600 transition-colors"
+                          title="Télécharger PDF"
+                        >
+                          <Download size={15} />
+                        </button>
+                      </td>
+                      <td className="px-4 py-3">
+                        <button
+                          onClick={() => handleTogglePaid(inv)}
+                          disabled={togglingId === inv.id}
+                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap ${
+                            inv.status === 'paid'
+                              ? 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                              : 'bg-green-50 text-green-700 hover:bg-green-100 border border-green-200'
+                          }`}
+                        >
+                          {togglingId === inv.id ? (
+                            <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                          ) : (
+                            <CheckCircle2 size={13} />
+                          )}
+                          {inv.status === 'paid' ? 'Marquer impayé' : 'Marquer payé'}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </Card>
 

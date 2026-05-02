@@ -103,14 +103,52 @@ export default function Orders() {
           </div>
         </div>
 
-        {/* Table */}
-        <div className="overflow-x-auto">
-          {filtered.length === 0 ? (
-            <div className="py-16 text-center text-slate-400">
-              <ClipboardListIcon />
-              <p className="mt-2 text-sm">{t('orders.no_orders')}</p>
-            </div>
-          ) : (
+        {/* Empty state */}
+        {filtered.length === 0 && (
+          <div className="py-16 text-center text-slate-400">
+            <ClipboardListIcon />
+            <p className="mt-2 text-sm">{t('orders.no_orders')}</p>
+          </div>
+        )}
+
+        {/* Mobile cards */}
+        {filtered.length > 0 && (
+          <div className="md:hidden divide-y divide-slate-100">
+            {filtered.map((order) => (
+              <div key={order.id} className="p-4 space-y-2">
+                <div className={`flex items-start justify-between gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                  <div>
+                    <p className="font-medium text-slate-800">{order.patient_name}</p>
+                    <p className="text-xs font-mono text-slate-400 mt-0.5">#{order.order_number}</p>
+                  </div>
+                  <StatusBadge status={order.status} label={t(`status.${order.status}`)} />
+                </div>
+                <div className="text-xs text-slate-500 space-y-1">
+                  {order.dentist?.name && <p>{order.dentist.name}</p>}
+                  <p>{t(`work_types.${order.work_type}`)} · {new Date(order.due_date).toLocaleDateString(isRTL ? 'ar-MA' : 'fr-FR')}</p>
+                  <p className="font-semibold text-slate-700">{order.price.toLocaleString()} {t('common.currency')}</p>
+                </div>
+                <div className={`flex gap-2 pt-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                  <Link to={`/orders/${order.id}`}>
+                    <button className="p-2 rounded-lg bg-primary-50 text-primary-600">
+                      <Eye size={15} />
+                    </button>
+                  </Link>
+                  <button
+                    onClick={() => setDeleteId(order.id)}
+                    className="p-2 rounded-lg bg-red-50 text-red-500"
+                  >
+                    <Trash2 size={15} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Desktop table */}
+        {filtered.length > 0 && (
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-slate-100 bg-slate-50">
@@ -155,10 +193,7 @@ export default function Orders() {
                       {order.price.toLocaleString()} {t('common.currency')}
                     </td>
                     <td className="px-4 py-3">
-                      <StatusBadge
-                        status={order.status}
-                        label={t(`status.${order.status}`)}
-                      />
+                      <StatusBadge status={order.status} label={t(`status.${order.status}`)} />
                     </td>
                     <td className="px-4 py-3">
                       <div className={`flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
@@ -179,8 +214,8 @@ export default function Orders() {
                 ))}
               </tbody>
             </table>
-          )}
-        </div>
+          </div>
+        )}
 
         {filtered.length > 0 && (
           <div className="px-5 py-3 border-t border-slate-100 text-xs text-slate-400">

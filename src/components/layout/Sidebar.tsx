@@ -7,6 +7,7 @@ import {
   Users,
   FileText,
   Settings,
+  X,
 } from 'lucide-react'
 import { useRTL } from '../../contexts/RTLContext'
 
@@ -18,18 +19,29 @@ const navItems = [
   { path: '/invoices', icon: FileText, key: 'nav.invoices' },
 ]
 
-export default function Sidebar() {
+interface SidebarProps {
+  open: boolean
+  onClose: () => void
+}
+
+export default function Sidebar({ open, onClose }: SidebarProps) {
   const { t } = useTranslation()
   const { isRTL } = useRTL()
 
   return (
     <aside
-      className={`w-64 shrink-0 bg-slate-900 text-white flex flex-col h-full overflow-hidden ${
-        isRTL ? 'border-l border-slate-700' : 'border-r border-slate-700'
-      }`}
+      className={`
+        w-64 shrink-0 bg-slate-900 text-white flex flex-col overflow-hidden
+        fixed inset-y-0 z-30 transition-transform duration-200
+        md:static md:translate-x-0 md:h-full
+        ${isRTL
+          ? `right-0 border-l border-slate-700 ${open ? 'translate-x-0' : 'translate-x-full'}`
+          : `left-0 border-r border-slate-700 ${open ? 'translate-x-0' : '-translate-x-full'}`
+        }
+      `}
     >
       {/* Logo */}
-      <div className="p-6 border-b border-slate-700/60">
+      <div className="p-5 border-b border-slate-700/60 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl overflow-hidden shrink-0">
             <img src="/IMG-20260425-WA0004.jpg" alt="logo" className="w-full h-full object-cover" />
@@ -39,6 +51,12 @@ export default function Sidebar() {
             <p className="text-xs text-slate-400 mt-0.5 leading-none">{t('app.tagline')}</p>
           </div>
         </div>
+        <button
+          onClick={onClose}
+          className="md:hidden p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+        >
+          <X size={16} />
+        </button>
       </div>
 
       {/* Navigation */}
@@ -47,6 +65,7 @@ export default function Sidebar() {
           <NavLink
             key={path}
             to={path}
+            onClick={onClose}
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
                 isActive
@@ -65,6 +84,7 @@ export default function Sidebar() {
       <div className="p-3 border-t border-slate-700/60">
         <NavLink
           to="/settings"
+          onClick={onClose}
           className={({ isActive }) =>
             `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
               isActive
