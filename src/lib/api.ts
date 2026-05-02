@@ -97,6 +97,25 @@ export async function deleteDentist(id: string): Promise<void> {
   await supabase.from('dentists').delete().eq('id', id)
 }
 
+// ── Dashboard stats reset ─────────────────────────────────────────────────────
+
+export async function getStatsResetAt(): Promise<string | null> {
+  if (isMockMode) return null
+  const labId = await getLabId()
+  const { data } = await supabase.from('profiles').select('stats_reset_at').eq('id', labId).single()
+  return data?.stats_reset_at ?? null
+}
+
+export async function resetDashboardStats(): Promise<void> {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Non authentifié')
+  const { error } = await supabase
+    .from('profiles')
+    .update({ stats_reset_at: new Date().toISOString() })
+    .eq('id', user.id)
+  if (error) throw new Error(error.message)
+}
+
 // ── Dentist portal users (profiles where role='dentist') ─────────────────────
 
 export async function getDentistUsers(): Promise<DentistUser[]> {
