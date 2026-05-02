@@ -28,23 +28,27 @@ ALTER TABLE profiles
 UPDATE profiles SET status = 'active' WHERE role = 'dentist';
 
 -- ── 3. Uppdatera trigger: nya dentister → 'pending', övriga → 'active' ─────────
-CREATE OR REPLACE FUNCTION handle_new_user()
-RETURNS TRIGGER AS $$
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $function$
 BEGIN
-  INSERT INTO profiles (id, role, full_name, email, status)
+  INSERT INTO public.profiles (id, role, full_name, email, status)
   VALUES (
-    new.id,
-    COALESCE(new.raw_user_meta_data->>'role', 'dentist'),
-    COALESCE(new.raw_user_meta_data->>'full_name', ''),
-    COALESCE(new.email, ''),
+    NEW.id,
+    COALESCE(NEW.raw_user_meta_data->>'role', 'dentist'),
+    COALESCE(NEW.raw_user_meta_data->>'full_name', ''),
+    COALESCE(NEW.email, ''),
     CASE
-      WHEN COALESCE(new.raw_user_meta_data->>'role', 'dentist') = 'dentist' THEN 'pending'
+      WHEN COALESCE(NEW.raw_user_meta_data->>'role', 'dentist') = 'dentist' THEN 'pending'
       ELSE 'active'
     END
   );
-  RETURN new;
+  RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$function$;
 
 -- ── 4. ON DELETE-beteende på orders.dentist_user_id ──────────────────────────
 --
