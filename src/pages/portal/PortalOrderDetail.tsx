@@ -34,10 +34,14 @@ export default function PortalOrderDetail() {
 
   const handleDownload = async (file: OrderFile) => {
     const url = await getFileDownloadUrl(file.storage_path)
+    const res = await fetch(url)
+    const blob = await res.blob()
+    const blobUrl = URL.createObjectURL(blob)
     const a = document.createElement('a')
-    a.href = url
+    a.href = blobUrl
     a.download = file.name
     a.click()
+    URL.revokeObjectURL(blobUrl)
   }
 
   if (loading) return <PageSpinner />

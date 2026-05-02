@@ -261,10 +261,14 @@ function FileRow({ file, isRTL }: { file: OrderFile; isRTL: boolean }) {
 
   const handleDownload = async () => {
     const url = await getFileDownloadUrl(file.storage_path)
+    const res = await fetch(url)
+    const blob = await res.blob()
+    const blobUrl = URL.createObjectURL(blob)
     const a = document.createElement('a')
-    a.href = url
+    a.href = blobUrl
     a.download = file.name
     a.click()
+    URL.revokeObjectURL(blobUrl)
   }
 
   return (

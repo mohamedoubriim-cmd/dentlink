@@ -9,6 +9,7 @@ import Input from '../components/ui/Input'
 import { InvoiceStatusBadge } from '../components/ui/Badge'
 import { PageSpinner } from '../components/ui/Spinner'
 import { getInvoices, getDentists, createInvoice, updateInvoiceStatus } from '../lib/api'
+import { downloadInvoicePdf } from '../lib/invoicePdf'
 import type { Invoice, Dentist } from '../types'
 import { useRTL } from '../contexts/RTLContext'
 
@@ -180,7 +181,7 @@ export default function Invoices() {
                   </td>
                   <td className="px-4 py-3">
                     <button
-                      onClick={() => window.open(`/invoices/${inv.id}/print`, '_blank')}
+                      onClick={() => downloadInvoicePdf(inv)}
                       className="p-1.5 rounded-lg hover:bg-primary-50 text-slate-400 hover:text-primary-600 transition-colors"
                       title="Télécharger PDF"
                     >

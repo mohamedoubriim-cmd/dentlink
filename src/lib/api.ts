@@ -320,7 +320,7 @@ export async function getMyInvoices(): Promise<Invoice[]> {
   if (isMockMode) return []
   const { data, error } = await supabase
     .from('invoices')
-    .select('*')
+    .select('*, dentist:dentists(*)')
     .order('created_at', { ascending: false })
   if (error) throw new Error(error.message)
   return data || []

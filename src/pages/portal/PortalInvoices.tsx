@@ -4,6 +4,7 @@ import { FileText, Download, CheckCircle2, Clock, AlertCircle } from 'lucide-rea
 import Card from '../../components/ui/Card'
 import { PageSpinner } from '../../components/ui/Spinner'
 import { getMyInvoices } from '../../lib/api'
+import { downloadInvoicePdf } from '../../lib/invoicePdf'
 import type { Invoice } from '../../types'
 import { useRTL } from '../../contexts/RTLContext'
 
@@ -107,7 +108,7 @@ export default function PortalInvoices() {
                     <p className="text-xs text-slate-400">MAD TTC</p>
                   </div>
                   <button
-                    onClick={() => window.open(`/invoices/${inv.id}/print`, '_blank')}
+                    onClick={() => downloadInvoicePdf(inv)}
                     className="p-2 rounded-lg bg-primary-50 text-primary-600 hover:bg-primary-100 transition-colors"
                     title="Télécharger PDF"
                   >

@@ -57,10 +57,10 @@ export default function InvoicePrint() {
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 40 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-            <img src="/logo.jpg" alt="logo" style={{ width: 56, height: 56, borderRadius: 12, objectFit: 'cover' }}
+            <img src="/IMG-20260425-WA0004.jpg" alt="logo" style={{ width: 56, height: 56, borderRadius: 12, objectFit: 'cover' }}
               onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
             <div>
-              <div style={{ fontSize: 22, fontWeight: 800, color: '#1e293b', letterSpacing: -0.5 }}>DentLink</div>
+              <div style={{ fontSize: 22, fontWeight: 800, color: '#1e293b', letterSpacing: -0.5 }}>Laboratoire Oubriim</div>
               <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>Laboratoire de Prothèse Dentaire</div>
             </div>
           </div>
@@ -152,7 +152,7 @@ export default function InvoicePrint() {
 
         {/* Footer */}
         <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ fontSize: 11, color: '#94a3b8' }}>DentLink — Laboratoire de Prothèse Dentaire · Maroc</div>
+          <div style={{ fontSize: 11, color: '#94a3b8' }}>Laboratoire Oubriim — Laboratoire de Prothèse Dentaire · Maroc</div>
           <div style={{ fontSize: 11, color: '#94a3b8' }}>{invoice.invoice_number}</div>
         </div>
       </div>
