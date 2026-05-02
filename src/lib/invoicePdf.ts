@@ -61,9 +61,19 @@ export async function downloadInvoicePdf(invoice: Invoice) {
   const colW = (W - M * 2 - 6) / 2
   const col2 = M + colW + 6
 
+  // Beräkna höjden dynamiskt baserat på antal dentist-fält
+  const dentistLines = [
+    invoice.dentist?.clinic,
+    invoice.dentist?.address,
+    invoice.dentist?.city,
+    invoice.dentist?.phone,
+    invoice.dentist?.email,
+  ].filter(Boolean)
+  const boxH = 16 + dentistLines.length * 5
+
   // "Facturé à" box
   doc.setFillColor(248, 250, 252)
-  doc.roundedRect(M, y, colW, 38, 3, 3, 'F')
+  doc.roundedRect(M, y, colW, boxH, 3, 3, 'F')
   doc.setFontSize(7)
   doc.setFont('helvetica', 'bold')
   doc.setTextColor(148, 163, 184)
@@ -78,13 +88,15 @@ export async function downloadInvoicePdf(invoice: Invoice) {
   doc.setFont('helvetica', 'normal')
   doc.setTextColor(71, 85, 105)
   let infoY = y + 19
-  if (invoice.dentist?.clinic)  { doc.text(invoice.dentist.clinic, M + 4, infoY); infoY += 5 }
-  if (invoice.dentist?.phone)   { doc.text(invoice.dentist.phone, M + 4, infoY); infoY += 5 }
-  if (invoice.dentist?.city)    { doc.text(invoice.dentist.city, M + 4, infoY) }
+  if (invoice.dentist?.clinic)  { doc.text(invoice.dentist.clinic,  M + 4, infoY); infoY += 5 }
+  if (invoice.dentist?.address) { doc.text(invoice.dentist.address, M + 4, infoY); infoY += 5 }
+  if (invoice.dentist?.city)    { doc.text(invoice.dentist.city,    M + 4, infoY); infoY += 5 }
+  if (invoice.dentist?.phone)   { doc.text(invoice.dentist.phone,   M + 4, infoY); infoY += 5 }
+  if (invoice.dentist?.email)   { doc.text(invoice.dentist.email,   M + 4, infoY) }
 
-  // "Détails" box
+  // "Détails" box — samma höjd som Facturé à
   doc.setFillColor(248, 250, 252)
-  doc.roundedRect(col2, y, colW, 38, 3, 3, 'F')
+  doc.roundedRect(col2, y, colW, boxH, 3, 3, 'F')
   doc.setFontSize(7)
   doc.setFont('helvetica', 'bold')
   doc.setTextColor(148, 163, 184)
@@ -109,7 +121,7 @@ export async function downloadInvoicePdf(invoice: Invoice) {
     doc.text(value, col2 + colW - 4, dy, { align: 'right' })
   })
 
-  y += 46
+  y += boxH + 8
 
   // ── Table ─────────────────────────────────────────────────────────────────
   const tableW = W - M * 2

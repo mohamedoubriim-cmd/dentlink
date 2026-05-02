@@ -81,9 +81,11 @@ export default function InvoicePrint() {
               Facturé à
             </div>
             <div style={{ fontSize: 15, fontWeight: 700, color: '#1e293b' }}>{invoice.dentist?.name ?? '—'}</div>
-            {invoice.dentist?.clinic && <div style={{ fontSize: 13, color: '#475569', marginTop: 3 }}>{invoice.dentist.clinic}</div>}
-            {invoice.dentist?.phone && <div style={{ fontSize: 13, color: '#475569', marginTop: 2 }}>{invoice.dentist.phone}</div>}
-            {invoice.dentist?.city && <div style={{ fontSize: 13, color: '#475569', marginTop: 2 }}>{invoice.dentist.city}</div>}
+            {invoice.dentist?.clinic   && <div style={{ fontSize: 13, color: '#475569', marginTop: 3  }}>{invoice.dentist.clinic}</div>}
+            {invoice.dentist?.address  && <div style={{ fontSize: 13, color: '#475569', marginTop: 2  }}>{invoice.dentist.address}</div>}
+            {invoice.dentist?.city     && <div style={{ fontSize: 13, color: '#475569', marginTop: 2  }}>{invoice.dentist.city}</div>}
+            {invoice.dentist?.phone    && <div style={{ fontSize: 13, color: '#475569', marginTop: 2  }}>{invoice.dentist.phone}</div>}
+            {invoice.dentist?.email    && <div style={{ fontSize: 13, color: '#475569', marginTop: 2  }}>{invoice.dentist.email}</div>}
           </div>
 
           {/* Dates */}
