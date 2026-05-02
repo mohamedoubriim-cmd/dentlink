@@ -12,10 +12,13 @@ import { getInvoices, getDentists, createInvoice, updateInvoiceStatus } from '..
 import { downloadInvoicePdf } from '../lib/invoicePdf'
 import type { Invoice, Dentist } from '../types'
 import { useRTL } from '../contexts/RTLContext'
+import { useAuth } from '../contexts/AuthContext'
 
 export default function Invoices() {
   const { t } = useTranslation()
   const { isRTL } = useRTL()
+  const { role } = useAuth()
+  const canManage = role === 'lab_admin' || role === 'lab_staff'
   const [invoices, setInvoices] = useState<Invoice[]>([])
   const [dentists, setDentists] = useState<Dentist[]>([])
   const [loading, setLoading] = useState(true)
@@ -86,9 +89,11 @@ export default function Invoices() {
     <div className="space-y-5">
       <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
         <h1 className="text-2xl font-bold text-slate-800">{t('invoices.title')}</h1>
-        <Button icon={<Plus size={16} />} onClick={() => setShowNew(true)}>
-          {t('invoices.new_invoice')}
-        </Button>
+        {canManage && (
+          <Button icon={<Plus size={16} />} onClick={() => setShowNew(true)}>
+            {t('invoices.new_invoice')}
+          </Button>
+        )}
       </div>
 
       {/* Summary cards */}
@@ -159,21 +164,23 @@ export default function Invoices() {
                     >
                       <Download size={15} />
                     </button>
-                    <button
-                      onClick={() => handleTogglePaid(inv)}
-                      disabled={togglingId === inv.id}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                        inv.status === 'paid'
-                          ? 'bg-slate-100 text-slate-600'
-                          : 'bg-green-50 text-green-700 border border-green-200'
-                      }`}
-                    >
-                      {togglingId === inv.id
-                        ? <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                        : <CheckCircle2 size={13} />
-                      }
-                      {inv.status === 'paid' ? 'Marquer impayé' : 'Marquer payé'}
-                    </button>
+                    {canManage && (
+                      <button
+                        onClick={() => handleTogglePaid(inv)}
+                        disabled={togglingId === inv.id}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                          inv.status === 'paid'
+                            ? 'bg-slate-100 text-slate-600'
+                            : 'bg-green-50 text-green-700 border border-green-200'
+                        }`}
+                      >
+                        {togglingId === inv.id
+                          ? <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                          : <CheckCircle2 size={13} />
+                        }
+                        {inv.status === 'paid' ? 'Marquer impayé' : 'Marquer payé'}
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}
@@ -235,22 +242,24 @@ export default function Invoices() {
                         </button>
                       </td>
                       <td className="px-4 py-3">
-                        <button
-                          onClick={() => handleTogglePaid(inv)}
-                          disabled={togglingId === inv.id}
-                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap ${
-                            inv.status === 'paid'
-                              ? 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                              : 'bg-green-50 text-green-700 hover:bg-green-100 border border-green-200'
-                          }`}
-                        >
-                          {togglingId === inv.id ? (
-                            <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                          ) : (
-                            <CheckCircle2 size={13} />
-                          )}
-                          {inv.status === 'paid' ? 'Marquer impayé' : 'Marquer payé'}
-                        </button>
+                        {canManage && (
+                          <button
+                            onClick={() => handleTogglePaid(inv)}
+                            disabled={togglingId === inv.id}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap ${
+                              inv.status === 'paid'
+                                ? 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                                : 'bg-green-50 text-green-700 hover:bg-green-100 border border-green-200'
+                            }`}
+                          >
+                            {togglingId === inv.id ? (
+                              <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                            ) : (
+                              <CheckCircle2 size={13} />
+                            )}
+                            {inv.status === 'paid' ? 'Marquer impayé' : 'Marquer payé'}
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))}

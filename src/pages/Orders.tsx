@@ -10,12 +10,15 @@ import Modal from '../components/ui/Modal'
 import { getOrders, deleteOrder } from '../lib/api'
 import type { Order, OrderStatus } from '../types'
 import { useRTL } from '../contexts/RTLContext'
+import { useAuth } from '../contexts/AuthContext'
 
 const ALL = 'all'
 
 export default function Orders() {
   const { t } = useTranslation()
   const { isRTL } = useRTL()
+  const { role } = useAuth()
+  const canDelete = role === 'lab_admin'
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -134,12 +137,14 @@ export default function Orders() {
                       <Eye size={15} />
                     </button>
                   </Link>
-                  <button
-                    onClick={() => setDeleteId(order.id)}
-                    className="p-2 rounded-lg bg-red-50 text-red-500"
-                  >
-                    <Trash2 size={15} />
-                  </button>
+                  {canDelete && (
+                    <button
+                      onClick={() => setDeleteId(order.id)}
+                      className="p-2 rounded-lg bg-red-50 text-red-500"
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
@@ -202,12 +207,14 @@ export default function Orders() {
                             <Eye size={15} />
                           </button>
                         </Link>
-                        <button
-                          onClick={() => setDeleteId(order.id)}
-                          className="p-1.5 rounded-lg hover:bg-red-50 text-slate-400 hover:text-red-500 transition-colors"
-                        >
-                          <Trash2 size={15} />
-                        </button>
+                        {canDelete && (
+                          <button
+                            onClick={() => setDeleteId(order.id)}
+                            className="p-1.5 rounded-lg hover:bg-red-50 text-slate-400 hover:text-red-500 transition-colors"
+                          >
+                            <Trash2 size={15} />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

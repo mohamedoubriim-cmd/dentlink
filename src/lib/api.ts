@@ -5,6 +5,24 @@ import type { Dentist, Order, Invoice, Patient, OrderStatus, OrderFile, UserProf
 async function getLabId(): Promise<string> {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Non authentifié — veuillez vous reconnecter')
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+
+  // lab_staff delar lab_admin's ID som lab_id
+  if (profile?.role === 'lab_staff') {
+    const { data: adminProfile } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('role', 'lab_admin')
+      .limit(1)
+      .single()
+    if (adminProfile) return adminProfile.id
+  }
+
   return user.id
 }
 
@@ -197,6 +215,23 @@ export async function createOrderAsDentist(
     .select('*')
     .single()
   if (error) throw new Error(error.message)
+
+  // Skicka in-app notis till alla lab-användare (lab_admin + lab_staff)
+  const { data: labUsers } = await supabase
+    .from('profiles')
+    .select('id')
+    .in('role', ['lab_admin', 'lab_staff'])
+  if (labUsers && labUsers.length > 0) {
+    await supabase.from('notifications').insert(
+      labUsers.map((u) => ({
+        user_id: u.id,
+        title: 'Nouvelle commande',
+        message: `Commande ${created.order_number} — ${data.patient_name}`,
+        order_id: created.id,
+      }))
+    )
+  }
+
   return created
 }
 
@@ -312,6 +347,11 @@ export async function deleteOrderFile(fileId: string, storagePath: string): Prom
   await supabase.from('order_files').delete().eq('id', fileId)
 }
 
+async function getUserIdByEmail(email: string): Promise<string | null> {
+  const { data } = await supabase.rpc('get_user_id_by_email', { user_email: email })
+  return data ?? null
+}
+
 // ── Invoices ──────────────────────────────────────────────────────────────────
 
 let localInvoices = [...mockInvoices]
@@ -356,16 +396,15 @@ export async function updateInvoiceStatus(id: string, status: Invoice['status'])
   if (invoice) {
     const dentistEmail = (invoice.dentist as any)?.email
     if (dentistEmail) {
-      const { data: profile } = await supabase
-        .from('profiles').select('id').eq('email', dentistEmail).eq('role', 'dentist').maybeSingle()
-      if (profile) {
+      const userId = await getUserIdByEmail(dentistEmail)
+      if (userId) {
         const labels: Record<string, string> = {
           paid:    'réglée',
           unpaid:  'impayée',
           partial: 'partiellement réglée',
         }
         await supabase.from('notifications').insert({
-          user_id: profile.id,
+          user_id: userId,
           title: 'Statut de facture mis à jour',
           message: `Facture ${invoice.invoice_number} (${invoice.total} MAD) — ${labels[status] ?? status}`,
           order_id: null,
@@ -402,15 +441,10 @@ export async function createInvoice(data: Omit<Invoice, 'id' | 'invoice_number' 
   // Notify dentist
   const dentistEmail = (created.dentist as any)?.email
   if (dentistEmail) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('email', dentistEmail)
-      .eq('role', 'dentist')
-      .maybeSingle()
-    if (profile) {
+    const userId = await getUserIdByEmail(dentistEmail)
+    if (userId) {
       await supabase.from('notifications').insert({
-        user_id: profile.id,
+        user_id: userId,
         title: 'Nouvelle facture',
         message: `Facture ${created.invoice_number} — ${created.total} MAD TTC`,
         order_id: null,

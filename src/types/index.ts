@@ -22,7 +22,7 @@ export type Material =
   | 'composite'
   | 'other'
 
-export type UserRole = 'lab_admin' | 'dentist'
+export type UserRole = 'lab_admin' | 'lab_staff' | 'dentist'
 
 export interface UserProfile {
   id: string
