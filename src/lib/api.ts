@@ -293,6 +293,15 @@ export async function updateTrackingNumber(id: string, tracking_number: string):
   await supabase.from('orders').update({ tracking_number }).eq('id', id)
 }
 
+export async function updateOrderPrice(id: string, price: number): Promise<void> {
+  if (isMockMode) {
+    const idx = localOrders.findIndex((o) => o.id === id)
+    if (idx !== -1) localOrders[idx] = { ...localOrders[idx], price }
+    return
+  }
+  await supabase.from('orders').update({ price, updated_at: new Date().toISOString() }).eq('id', id)
+}
+
 export async function deleteOrder(id: string): Promise<void> {
   if (isMockMode) { localOrders = localOrders.filter((o) => o.id !== id); return }
   await supabase.from('orders').delete().eq('id', id)

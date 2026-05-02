@@ -51,7 +51,6 @@ export default function NewOrder() {
     if (!form.work_type) e.work_type = t('common.required_field')
     if (!form.material) e.material = t('common.required_field')
     if (!form.due_date) e.due_date = t('common.required_field')
-    if (!form.price) e.price = t('common.required_field')
     setErrors(e)
     return Object.keys(e).length === 0
   }
@@ -195,9 +194,7 @@ export default function NewOrder() {
               step="0.01"
               value={form.price}
               onChange={(e) => set('price', e.target.value)}
-              required
-              error={errors.price}
-              placeholder="0"
+              placeholder="0.00"
             />
           </div>
         </Card>

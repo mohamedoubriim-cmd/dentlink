@@ -7,7 +7,7 @@ import Button from '../components/ui/Button'
 import { StatusBadge } from '../components/ui/Badge'
 import Select from '../components/ui/Select'
 import { PageSpinner } from '../components/ui/Spinner'
-import { getOrder, updateOrderStatus, updateTrackingNumber, getFileDownloadUrl } from '../lib/api'
+import { getOrder, updateOrderStatus, updateTrackingNumber, updateOrderPrice, getFileDownloadUrl } from '../lib/api'
 import type { Order, OrderStatus, OrderFile } from '../types'
 import { useRTL } from '../contexts/RTLContext'
 
@@ -22,6 +22,8 @@ export default function OrderDetail() {
   const [saving, setSaving] = useState(false)
   const [trackingNumber, setTrackingNumber] = useState('')
   const [savingTracking, setSavingTracking] = useState(false)
+  const [price, setPrice] = useState('')
+  const [savingPrice, setSavingPrice] = useState(false)
 
   useEffect(() => {
     if (id) {
@@ -30,6 +32,7 @@ export default function OrderDetail() {
         if (data) {
           setNewStatus(data.status)
           setTrackingNumber(data.tracking_number ?? '')
+          setPrice(data.price > 0 ? String(data.price) : '')
         }
         setLoading(false)
       })
@@ -50,6 +53,15 @@ export default function OrderDetail() {
     await updateTrackingNumber(order.id, trackingNumber)
     setOrder((prev) => prev ? { ...prev, tracking_number: trackingNumber } : prev)
     setSavingTracking(false)
+  }
+
+  const handleSavePrice = async () => {
+    if (!order) return
+    setSavingPrice(true)
+    const newPrice = parseFloat(price) || 0
+    await updateOrderPrice(order.id, newPrice)
+    setOrder((prev) => prev ? { ...prev, price: newPrice } : prev)
+    setSavingPrice(false)
   }
 
   const statusOptions: OrderStatus[] = ['pending', 'in_progress', 'ready', 'delivered', 'cancelled']
@@ -175,6 +187,30 @@ export default function OrderDetail() {
               disabled={newStatus === order.status}
             >
               {t('common.save')}
+            </Button>
+          </Card>
+
+          <Card>
+            <h3 className="text-sm font-semibold text-slate-700 mb-3">
+              {t('orders.price')} (MAD)
+            </h3>
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              placeholder="0.00"
+              className="w-full border border-slate-300 rounded-lg text-sm px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary-500"
+            />
+            <Button
+              onClick={handleSavePrice}
+              loading={savingPrice}
+              variant="outline"
+              className="w-full mt-2"
+              disabled={parseFloat(price || '0') === order.price}
+            >
+              Enregistrer
             </Button>
           </Card>
 
