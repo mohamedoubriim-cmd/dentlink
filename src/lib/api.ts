@@ -462,22 +462,23 @@ export async function updateInvoiceStatus(id: string, status: Invoice['status'])
   if (invoice) {
     const dentistEmail = (invoice.dentist as any)?.email
     if (dentistEmail) {
-      const userId = await getUserIdByEmail(dentistEmail)
-      if (userId) {
-        const labels: Record<string, string> = {
-          paid:    'réglée',
-          unpaid:  'impayée',
-          partial: 'partiellement réglée',
-        }
-        await supabase.from('notifications').insert({
-          user_id: userId,
-          title: 'Statut de facture mis à jour',
-          message: `Facture ${invoice.invoice_number} (${invoice.total} MAD) — ${labels[status] ?? status}`,
-          order_id: null,
-          invoice_id: id,
-          read: false,
-        })
+      const labels: Record<string, string> = {
+        paid:    'réglée',
+        unpaid:  'impayée',
+        partial: 'partiellement réglée',
       }
+      getUserIdByEmail(dentistEmail).then((userId) => {
+        if (userId) {
+          supabase.from('notifications').insert({
+            user_id: userId,
+            title: 'Statut de facture mis à jour',
+            message: `Facture ${invoice.invoice_number} (${invoice.total} MAD) — ${labels[status] ?? status}`,
+            order_id: null,
+            invoice_id: id,
+            read: false,
+          })
+        }
+      }).catch(() => { /* notification failure should not block status update */ })
     }
   }
 }
@@ -505,20 +506,21 @@ export async function createInvoice(data: Omit<Invoice, 'id' | 'invoice_number' 
     .single()
   if (error) throw new Error(error.message)
 
-  // Notify dentist
+  // Notify dentist (non-blocking)
   const dentistEmail = (created.dentist as any)?.email
   if (dentistEmail) {
-    const userId = await getUserIdByEmail(dentistEmail)
-    if (userId) {
-      await supabase.from('notifications').insert({
-        user_id: userId,
-        title: 'Nouvelle facture',
-        message: `Facture ${created.invoice_number} — ${created.total} MAD TTC`,
-        order_id: null,
-        invoice_id: created.id,
-        read: false,
-      })
-    }
+    getUserIdByEmail(dentistEmail).then((userId) => {
+      if (userId) {
+        supabase.from('notifications').insert({
+          user_id: userId,
+          title: 'Nouvelle facture',
+          message: `Facture ${created.invoice_number} — ${created.total} MAD TTC`,
+          order_id: null,
+          invoice_id: created.id,
+          read: false,
+        })
+      }
+    }).catch(() => { /* notification failure should not block invoice creation */ })
   }
 
   return created

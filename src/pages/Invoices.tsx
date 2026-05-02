@@ -26,6 +26,7 @@ export default function Invoices() {
   const [showNew, setShowNew] = useState(false)
   const [saving, setSaving] = useState(false)
   const [togglingId, setTogglingId] = useState<string | null>(null)
+  const [createError, setCreateError] = useState<string | null>(null)
 
   const [form, setForm] = useState({
     dentist_id: '',
@@ -54,22 +55,28 @@ export default function Invoices() {
     e.preventDefault()
     if (!form.dentist_id || !form.amount || !form.due_date) return
     setSaving(true)
-    const amount = parseFloat(form.amount) || 0
-    const tax = amount * 0.2
-    const created = await createInvoice({
-      dentist_id: form.dentist_id,
-      date: form.date,
-      due_date: form.due_date,
-      amount,
-      tax,
-      total: amount + tax,
-      status: 'unpaid',
-      notes: form.notes,
-    })
-    setInvoices((prev) => [created, ...prev])
-    setShowNew(false)
-    setSaving(false)
-    setForm({ dentist_id: '', date: new Date().toISOString().split('T')[0], due_date: '', amount: '', notes: '' })
+    setCreateError(null)
+    try {
+      const amount = parseFloat(form.amount) || 0
+      const tax = amount * 0.2
+      const created = await createInvoice({
+        dentist_id: form.dentist_id,
+        date: form.date,
+        due_date: form.due_date,
+        amount,
+        tax,
+        total: amount + tax,
+        status: 'unpaid',
+        notes: form.notes,
+      })
+      setInvoices((prev) => [created, ...prev])
+      setShowNew(false)
+      setForm({ dentist_id: '', date: new Date().toISOString().split('T')[0], due_date: '', amount: '', notes: '' })
+    } catch (err) {
+      setCreateError(err instanceof Error ? err.message : 'Erreur inconnue')
+    } finally {
+      setSaving(false)
+    }
   }
 
   const handleTogglePaid = async (inv: Invoice) => {
@@ -313,6 +320,9 @@ export default function Invoices() {
             rows={2}
             className="w-full border border-slate-300 rounded-lg text-sm px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
           />
+          {createError && (
+            <p className="text-xs text-red-600 bg-red-50 rounded-lg px-3 py-2">{createError}</p>
+          )}
           <div className={`flex gap-3 pt-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
             <Button type="submit" loading={saving} className="flex-1">{t('common.save')}</Button>
             <Button type="button" variant="outline" onClick={() => setShowNew(false)} className="flex-1">{t('common.cancel')}</Button>
