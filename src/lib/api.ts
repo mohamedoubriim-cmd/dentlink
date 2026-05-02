@@ -103,7 +103,7 @@ export async function getDentistUsers(): Promise<DentistUser[]> {
   if (isMockMode) return []
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, full_name, email, clinic, status, created_at')
+    .select('id, full_name, email, phone, clinic, city, status, created_at')
     .eq('role', 'dentist')
     .order('created_at', { ascending: false })
   if (error) throw new Error(error.message)

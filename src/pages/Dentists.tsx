@@ -76,7 +76,8 @@ export default function Dentists() {
     return (
       u.full_name.toLowerCase().includes(q) ||
       u.email.toLowerCase().includes(q) ||
-      u.clinic.toLowerCase().includes(q)
+      u.clinic.toLowerCase().includes(q) ||
+      u.city.toLowerCase().includes(q)
     )
   })
 
@@ -227,6 +228,7 @@ export default function Dentists() {
                   <th className="text-left text-xs font-medium text-slate-400 uppercase tracking-wide px-4 py-3">Nom</th>
                   <th className="text-left text-xs font-medium text-slate-400 uppercase tracking-wide px-4 py-3">Email</th>
                   <th className="text-left text-xs font-medium text-slate-400 uppercase tracking-wide px-4 py-3 hidden md:table-cell">Clinique</th>
+                  <th className="text-left text-xs font-medium text-slate-400 uppercase tracking-wide px-4 py-3 hidden lg:table-cell">Ville</th>
                   <th className="text-left text-xs font-medium text-slate-400 uppercase tracking-wide px-4 py-3 hidden lg:table-cell">Inscription</th>
                   <th className="text-left text-xs font-medium text-slate-400 uppercase tracking-wide px-4 py-3">Statut</th>
                   <th className="text-right text-xs font-medium text-slate-400 uppercase tracking-wide px-4 py-3">Actions</th>
@@ -245,6 +247,7 @@ export default function Dentists() {
                     </td>
                     <td className="px-4 py-3 text-slate-500 max-w-[180px] truncate">{user.email}</td>
                     <td className="px-4 py-3 text-slate-500 hidden md:table-cell">{user.clinic || '—'}</td>
+                    <td className="px-4 py-3 text-slate-500 hidden lg:table-cell">{user.city || '—'}</td>
                     <td className="px-4 py-3 text-slate-500 hidden lg:table-cell">
                       {format(new Date(user.created_at), 'd MMM yyyy', { locale: fr })}
                     </td>

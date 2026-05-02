@@ -42,7 +42,9 @@ export interface DentistUser {
   id: string
   full_name: string
   email: string
+  phone: string
   clinic: string
+  city: string
   status: DentistStatus
   created_at: string
 }

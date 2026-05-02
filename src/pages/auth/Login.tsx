@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Mail, Lock, AlertCircle, User, Stethoscope } from 'lucide-react'
+import { Mail, Lock, AlertCircle, User, Stethoscope, Phone, Building2, MapPin } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import Button from '../../components/ui/Button'
 import Input from '../../components/ui/Input'
@@ -14,6 +14,9 @@ export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [name, setName] = useState('')
+  const [phone, setPhone] = useState('')
+  const [clinic, setClinic] = useState('')
+  const [city, setCity] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
@@ -28,12 +31,19 @@ export default function Login() {
       const { error: err } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { full_name: name, role: 'dentist' } },
+        options: {
+          data: {
+            full_name: name,
+            role: 'dentist',
+            phone,
+            clinic,
+            city,
+          },
+        },
       })
       if (err) {
         setError(err.message)
       } else {
-        // Auto-login after signup
         await signIn(email, password)
       }
     } else {
@@ -44,13 +54,18 @@ export default function Login() {
     setLoading(false)
   }
 
+  const switchMode = (m: 'login' | 'signup') => {
+    setMode(m)
+    setError(null)
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-primary-950 flex flex-col">
       <div className="flex justify-end p-4">
         <LanguageSwitcher variant="dark" />
       </div>
 
-      <div className="flex-1 flex items-center justify-center px-4">
+      <div className="flex-1 flex items-center justify-center px-4 py-8">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl shadow-lg mb-4 overflow-hidden">
@@ -64,7 +79,7 @@ export default function Login() {
             {/* Tabs */}
             <div className="flex bg-slate-100 rounded-xl p-1 mb-6">
               <button
-                onClick={() => { setMode('login'); setError(null) }}
+                onClick={() => switchMode('login')}
                 className={`flex-1 py-2 text-sm font-medium rounded-lg transition-colors ${
                   mode === 'login' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'
                 }`}
@@ -72,7 +87,7 @@ export default function Login() {
                 {t('auth.login')}
               </button>
               <button
-                onClick={() => { setMode('signup'); setError(null) }}
+                onClick={() => switchMode('signup')}
                 className={`flex-1 py-2 text-sm font-medium rounded-lg transition-colors ${
                   mode === 'signup' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'
                 }`}
@@ -115,7 +130,38 @@ export default function Login() {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Dr. Ahmed Bennani"
+                    required
                     icon={<User size={16} />}
+                  />
+
+                  <Input
+                    label="Téléphone"
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="+212 6XX XXX XXX"
+                    required
+                    icon={<Phone size={16} />}
+                  />
+
+                  <Input
+                    label="Nom du cabinet"
+                    type="text"
+                    value={clinic}
+                    onChange={(e) => setClinic(e.target.value)}
+                    placeholder="Cabinet dentaire Al Nour"
+                    required
+                    icon={<Building2 size={16} />}
+                  />
+
+                  <Input
+                    label="Ville"
+                    type="text"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    placeholder="Casablanca"
+                    required
+                    icon={<MapPin size={16} />}
                   />
                 </>
               )}
