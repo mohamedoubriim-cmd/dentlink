@@ -1,6 +1,6 @@
 import { isMockMode, supabase } from './supabase'
 import { mockDentists, mockOrders, mockInvoices, mockPatients } from './mockData'
-import type { Dentist, Order, Invoice, Patient, OrderStatus, OrderFile, UserProfile } from '../types'
+import type { Dentist, DentistUser, DentistStatus, Order, Invoice, Patient, OrderStatus, OrderFile, UserProfile } from '../types'
 
 async function getLabId(): Promise<string> {
   const { data: { user } } = await supabase.auth.getUser()
@@ -95,6 +95,34 @@ export async function updateDentist(id: string, data: Partial<Dentist>): Promise
 export async function deleteDentist(id: string): Promise<void> {
   if (isMockMode) { localDentists = localDentists.filter((d) => d.id !== id); return }
   await supabase.from('dentists').delete().eq('id', id)
+}
+
+// ── Dentist portal users (profiles where role='dentist') ─────────────────────
+
+export async function getDentistUsers(): Promise<DentistUser[]> {
+  if (isMockMode) return []
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('id, full_name, email, clinic, status, created_at')
+    .eq('role', 'dentist')
+    .order('created_at', { ascending: false })
+  if (error) throw new Error(error.message)
+  return (data || []) as DentistUser[]
+}
+
+export async function updateDentistStatus(userId: string, status: DentistStatus): Promise<void> {
+  const { error } = await supabase
+    .from('profiles')
+    .update({ status })
+    .eq('id', userId)
+  if (error) throw new Error(error.message)
+}
+
+export async function deleteDentistUser(userId: string): Promise<void> {
+  const { error } = await supabase.functions.invoke('delete-dentist', {
+    body: { dentist_user_id: userId },
+  })
+  if (error) throw new Error(error.message)
 }
 
 // ── Orders ────────────────────────────────────────────────────────────────────

@@ -1,13 +1,14 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 import type { User, Session } from '@supabase/supabase-js'
 import { supabase, isMockMode } from '../lib/supabase'
-import type { MockUser, UserRole } from '../types'
+import type { MockUser, UserRole, DentistStatus } from '../types'
 
 interface AuthContextType {
   user: User | MockUser | null
   session: Session | null
   loading: boolean
   role: UserRole | null
+  status: DentistStatus | null
   signIn: (email: string, password: string) => Promise<{ error: string | null }>
   signOut: () => Promise<void>
 }
@@ -17,6 +18,7 @@ const AuthContext = createContext<AuthContextType>({
   session: null,
   loading: true,
   role: null,
+  status: null,
   signIn: async () => ({ error: null }),
   signOut: async () => {},
 })
@@ -26,14 +28,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
   const [role, setRole] = useState<UserRole | null>(null)
+  const [status, setStatus] = useState<DentistStatus | null>(null)
 
   const fetchRole = async (userId: string) => {
     const { data } = await supabase
       .from('profiles')
-      .select('role')
+      .select('role, status')
       .eq('id', userId)
       .single()
     setRole((data?.role as UserRole) ?? 'dentist')
+    setStatus((data?.status as DentistStatus) ?? null)
   }
 
   useEffect(() => {
@@ -43,6 +47,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const parsed = JSON.parse(saved)
         setUser(parsed)
         setRole(parsed.role ?? 'lab_admin')
+        setStatus('active')
       }
       setLoading(false)
       return
@@ -59,7 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(session)
       setUser(session?.user ?? null)
       if (session?.user) fetchRole(session.user.id)
-      else setRole(null)
+      else { setRole(null); setStatus(null) }
     })
 
     return () => subscription.unsubscribe()
@@ -77,6 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.setItem('dentlink_mock_user', JSON.stringify(mockUser))
       setUser(mockUser)
       setRole('lab_admin')
+      setStatus('active')
       return { error: null }
     }
     const { error } = await supabase.auth.signInWithPassword({ email, password })
@@ -88,14 +94,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.removeItem('dentlink_mock_user')
       setUser(null)
       setRole(null)
+      setStatus(null)
       return
     }
     await supabase.auth.signOut()
     setRole(null)
+    setStatus(null)
   }
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, role, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading, role, status, signIn, signOut }}>
       {children}
     </AuthContext.Provider>
   )

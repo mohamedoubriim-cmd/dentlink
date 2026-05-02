@@ -24,13 +24,26 @@ export type Material =
 
 export type UserRole = 'lab_admin' | 'lab_staff' | 'dentist'
 
+export type DentistStatus = 'pending' | 'active' | 'rejected'
+
 export interface UserProfile {
   id: string
   role: UserRole
+  status?: DentistStatus
   full_name: string
   phone: string
   clinic: string
+  email?: string
   avatar_url?: string
+  created_at: string
+}
+
+export interface DentistUser {
+  id: string
+  full_name: string
+  email: string
+  clinic: string
+  status: DentistStatus
   created_at: string
 }
 
