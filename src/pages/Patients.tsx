@@ -23,6 +23,7 @@ export default function Patients() {
 
   const [form, setForm] = useState({ name: '', age: '', gender: 'male' as 'male' | 'female', dentist_id: '' })
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [apiError, setApiError] = useState<string | null>(null)
 
   useEffect(() => {
     Promise.all([getPatients(), getDentists()]).then(([p, d]) => {
@@ -46,16 +47,22 @@ export default function Patients() {
     if (Object.keys(errs).length > 0) return
 
     setSaving(true)
-    const created = await createPatient({
-      name: form.name,
-      age: parseInt(form.age),
-      gender: form.gender,
-      dentist_id: form.dentist_id,
-    })
-    setPatients((prev) => [...prev, created])
-    setForm({ name: '', age: '', gender: 'male', dentist_id: '' })
-    setShowNew(false)
-    setSaving(false)
+    setApiError(null)
+    try {
+      const created = await createPatient({
+        name: form.name,
+        age: parseInt(form.age),
+        gender: form.gender,
+        dentist_id: form.dentist_id,
+      })
+      setPatients((prev) => [...prev, created])
+      setForm({ name: '', age: '', gender: 'male', dentist_id: '' })
+      setShowNew(false)
+    } catch (err) {
+      setApiError(err instanceof Error ? err.message : 'Erreur lors de la création')
+    } finally {
+      setSaving(false)
+    }
   }
 
   if (loading) return <PageSpinner />
@@ -139,7 +146,7 @@ export default function Patients() {
         )}
       </Card>
 
-      <Modal open={showNew} onClose={() => setShowNew(false)} title={t('patients.new_patient')} maxWidth="md">
+      <Modal open={showNew} onClose={() => { setShowNew(false); setApiError(null) }} title={t('patients.new_patient')} maxWidth="md">
         <form onSubmit={handleCreate} className="space-y-4">
           <Input
             label={t('patients.name')}
@@ -178,6 +185,9 @@ export default function Patients() {
             placeholder={t('common.select')}
             options={dentists.map((d) => ({ value: d.id, label: d.name }))}
           />
+          {apiError && (
+            <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{apiError}</p>
+          )}
           <div className={`flex gap-3 pt-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
             <Button type="submit" loading={saving} className="flex-1">{t('common.save')}</Button>
             <Button type="button" variant="outline" onClick={() => setShowNew(false)} className="flex-1">{t('common.cancel')}</Button>

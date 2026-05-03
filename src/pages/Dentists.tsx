@@ -245,7 +245,12 @@ export default function Dentists() {
                         <span className="font-medium text-slate-800">{user.full_name || '—'}</span>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-slate-500 max-w-[180px] truncate">{user.email}</td>
+                    <td className="px-4 py-3">
+                      <div className="text-slate-500 max-w-[180px] truncate">{user.email}</div>
+                      {user.phone && (
+                        <div className="text-xs text-slate-400 mt-0.5">{user.phone}</div>
+                      )}
+                    </td>
                     <td className="px-4 py-3 text-slate-500 hidden md:table-cell">{user.clinic || '—'}</td>
                     <td className="px-4 py-3 text-slate-500 hidden lg:table-cell">{user.city || '—'}</td>
                     <td className="px-4 py-3 text-slate-500 hidden lg:table-cell">

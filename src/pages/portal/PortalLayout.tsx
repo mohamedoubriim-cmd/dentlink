@@ -1,6 +1,6 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { ClipboardList, Plus, LogOut, User, FileText } from 'lucide-react'
+import { ClipboardList, Plus, LogOut, User, FileText, Users } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import { useRTL } from '../../contexts/RTLContext'
@@ -107,6 +107,19 @@ export default function PortalLayout() {
         >
           <FileText size={16} />
           Factures
+        </NavLink>
+        <NavLink
+          to="/patients"
+          className={({ isActive }) =>
+            `flex items-center gap-2 px-3 py-3 text-sm font-medium border-b-2 transition-colors ${
+              isActive
+                ? 'border-primary-600 text-primary-700'
+                : 'border-transparent text-slate-500 hover:text-slate-700'
+            } ${isRTL ? 'flex-row-reverse' : ''}`
+          }
+        >
+          <Users size={16} />
+          {t('nav.patients')}
         </NavLink>
       </div>
 

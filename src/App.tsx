@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom'
+import { useEffect } from 'react'
 import { Clock, XCircle } from 'lucide-react'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { RTLProvider } from './contexts/RTLContext'
@@ -64,6 +65,18 @@ function PendingAccountScreen({ status }: { status: 'pending' | 'rejected' }) {
   )
 }
 
+// Omdirigerar lab-användare som försöker nå /patients direkt via URL
+function LabPatientsDenied() {
+  const navigate = useNavigate()
+  useEffect(() => {
+    navigate('/dashboard', {
+      replace: true,
+      state: { deniedMsg: "Cette page n'est pas disponible pour votre compte." },
+    })
+  }, [navigate])
+  return null
+}
+
 function AuthGate() {
   const { user, role, status, loading } = useAuth()
 
@@ -84,6 +97,7 @@ function AuthGate() {
           <Route path="/portal/orders/:id" element={<PortalOrderDetail />} />
           <Route path="/portal/profile" element={<PortalProfile />} />
           <Route path="/portal/invoices" element={<PortalInvoices />} />
+          <Route path="/patients" element={<Patients />} />
           <Route path="*" element={<Navigate to="/portal" replace />} />
         </Route>
       </Routes>
@@ -101,7 +115,7 @@ function AuthGate() {
         <Route path="/orders/:id" element={<OrderDetail />} />
         <Route path="/dentists" element={<Dentists />} />
         <Route path="/dentists/new" element={<NewDentist />} />
-        <Route path="/patients" element={<Patients />} />
+        <Route path="/patients" element={<LabPatientsDenied />} />
         <Route path="/invoices" element={<Invoices />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />

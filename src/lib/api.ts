@@ -12,8 +12,8 @@ async function getLabId(): Promise<string> {
     .eq('id', user.id)
     .single()
 
-  // lab_staff delar lab_admin's ID som lab_id
-  if (profile?.role === 'lab_staff') {
+  // lab_staff och dentist delar lab_admin's ID som lab_id
+  if (profile?.role === 'lab_staff' || profile?.role === 'dentist') {
     const { data: adminProfile } = await supabase
       .from('profiles')
       .select('id')

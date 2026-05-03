@@ -7,8 +7,8 @@ import Button from '../../components/ui/Button'
 import Input from '../../components/ui/Input'
 import Select from '../../components/ui/Select'
 import FileUpload, { type PendingFile } from '../../components/ui/FileUpload'
-import { getDentists, createOrderAsDentist, uploadOrderFile } from '../../lib/api'
-import type { Dentist, WorkType, Material } from '../../types'
+import { getDentists, createOrderAsDentist, uploadOrderFile, getPatients } from '../../lib/api'
+import type { Dentist, Patient, WorkType, Material } from '../../types'
 import { useRTL } from '../../contexts/RTLContext'
 
 export default function PortalNewOrder() {
@@ -16,6 +16,7 @@ export default function PortalNewOrder() {
   const { isRTL } = useRTL()
   const navigate = useNavigate()
   const [dentists, setDentists] = useState<Dentist[]>([])
+  const [patients, setPatients] = useState<Patient[]>([])
   const [files, setFiles] = useState<PendingFile[]>([])
   const [loading, setLoading] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
@@ -37,7 +38,10 @@ export default function PortalNewOrder() {
   })
 
   useEffect(() => {
-    getDentists().then(setDentists)
+    Promise.all([getDentists(), getPatients()]).then(([d, p]) => {
+      setDentists(d)
+      setPatients(p)
+    })
   }, [])
 
   const workTypes: WorkType[] = ['crown', 'bridge', 'denture', 'implant', 'veneer', 'inlay', 'night_guard', 'retainer', 'other']
@@ -122,13 +126,17 @@ export default function PortalNewOrder() {
             Patient
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Input
+            <Select
               label={t('orders.patient')}
               value={form.patient_name}
               onChange={(e) => set('patient_name', e.target.value)}
               required
               error={errors.patient_name}
-              placeholder="Nom du patient"
+              placeholder="Sélectionner un patient"
+              options={patients.map((p) => ({
+                value: p.name,
+                label: `${p.name} — ${p.age} ans`,
+              }))}
             />
             {dentists.length > 0 && (
               <Select
