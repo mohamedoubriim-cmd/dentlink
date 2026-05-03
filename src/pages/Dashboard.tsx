@@ -115,6 +115,23 @@ export default function Dashboard() {
 
   const recentOrders = orders.slice(0, 5)
 
+  // Periodeintäkter + obetalda — visas bara för lab_admin
+  const todayStr = new Date().toISOString().slice(0, 10)
+  const monday = new Date()
+  monday.setDate(monday.getDate() - (monday.getDay() === 0 ? 6 : monday.getDay() - 1))
+  const startOfWeekStr = monday.toISOString().slice(0, 10)
+
+  const paidAll = invoices.filter((i) => i.status === 'paid')
+  const revenueToday = paidAll.filter((i) => i.date === todayStr).reduce((s, i) => s + i.total, 0)
+  const revenueWeek  = paidAll.filter((i) => i.date >= startOfWeekStr).reduce((s, i) => s + i.total, 0)
+  const revenueMonth = paidAll.filter((i) => i.date.startsWith(thisMonth)).reduce((s, i) => s + i.total, 0)
+
+  const unpaidInvoices = invoices
+    .filter((i) => i.status === 'unpaid' || i.status === 'partial')
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+
+  const daysSince = (d: string) => Math.floor((Date.now() - new Date(d).getTime()) / 86_400_000)
+
   const statusLabels: Record<OrderStatus, string> = {
     pending: t('status.pending'),
     in_progress: t('status.in_progress'),
@@ -268,6 +285,75 @@ export default function Dashboard() {
           </Card>
         </div>
       </div>
+
+      {/* Periodeintäkter + Obetalda fakturor — bara lab_admin */}
+      {role === 'lab_admin' && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+          {/* A: Revenus par période */}
+          <Card padding={false}>
+            <div className="px-5 pt-4 pb-3 border-b border-slate-100">
+              <h3 className="text-sm font-semibold text-slate-700">Revenus par période</h3>
+            </div>
+            <table className="w-full text-sm">
+              <tbody>
+                {[
+                  { label: "Aujourd'hui", value: revenueToday },
+                  { label: 'Cette semaine', value: revenueWeek  },
+                  { label: 'Ce mois',       value: revenueMonth },
+                ].map(({ label, value }) => (
+                  <tr key={label} className="border-b border-slate-50 last:border-0">
+                    <td className="px-5 py-3.5 text-slate-500">{label}</td>
+                    <td className="px-5 py-3.5 text-right font-semibold text-slate-800">
+                      {value.toLocaleString()} {t('common.currency')}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </Card>
+
+          {/* B: Factures impayées — äldst först, röd badge > 30 dagar */}
+          <Card padding={false}>
+            <div className="px-5 pt-4 pb-3 border-b border-slate-100 flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-slate-700">Factures impayées</h3>
+              <Link to="/invoices" className="text-xs text-primary-600 hover:text-primary-700 font-medium">
+                Voir toutes →
+              </Link>
+            </div>
+            {unpaidInvoices.length === 0 ? (
+              <p className="px-5 py-8 text-center text-slate-400 text-sm">Aucune facture impayée</p>
+            ) : (
+              <div className="divide-y divide-slate-50 max-h-64 overflow-y-auto">
+                {unpaidInvoices.map((inv) => {
+                  const days = daysSince(inv.date)
+                  return (
+                    <Link
+                      key={inv.id}
+                      to="/invoices"
+                      className="flex items-center gap-3 px-5 py-3 hover:bg-slate-50 transition-colors"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-medium text-slate-700">{inv.invoice_number}</p>
+                        <p className="text-xs text-slate-400 mt-0.5 truncate">{inv.dentist?.name ?? '—'}</p>
+                      </div>
+                      <span className="text-sm font-semibold text-slate-700 shrink-0">
+                        {inv.total.toLocaleString()} {t('common.currency')}
+                      </span>
+                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full shrink-0 ${
+                        days > 30 ? 'bg-red-100 text-red-700' : 'bg-slate-100 text-slate-500'
+                      }`}>
+                        {days}j
+                      </span>
+                    </Link>
+                  )
+                })}
+              </div>
+            )}
+          </Card>
+
+        </div>
+      )}
 
       {/* Dialog: bekräfta nollställning */}
       <Modal
