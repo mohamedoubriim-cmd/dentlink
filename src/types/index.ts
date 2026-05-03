@@ -73,6 +73,8 @@ export interface Dentist {
   created_at: string
 }
 
+export type PaymentStatus = 'inte_betald' | 'betald'
+
 export interface Order {
   id: string
   order_number: string
@@ -88,32 +90,15 @@ export interface Order {
   due_date: string
   delivery_date?: string
   status: OrderStatus
-  price: number
+  price: number | null
+  payment_status: PaymentStatus
+  paid_at?: string | null
   notes?: string
   tracking_number?: string
   hidden_for_dentist?: boolean
   files?: OrderFile[]
   created_at: string
   updated_at: string
-}
-
-export type InvoiceStatus = 'brouillon' | 'envoyee' | 'payee' | 'annulee'
-
-export interface Invoice {
-  id: string
-  invoice_number: string
-  dentist_id: string
-  dentist?: Dentist
-  date: string
-  due_date: string
-  amount: number
-  tax: number
-  total: number
-  status: InvoiceStatus
-  notes?: string
-  sent_at?: string | null
-  sent_by?: string | null
-  created_at: string
 }
 
 export interface Patient {

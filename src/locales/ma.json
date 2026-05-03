@@ -35,7 +35,7 @@
     "view_all": "شوف الكل",
     "new_order": "أوردر جديد",
     "manage_dentists": "تدبير الدكاترة",
-    "create_invoice": "دير فاكتورة"
+    "create_invoice": "أوردر جديد"
   },
   "orders": {
     "title": "لوردرات",
@@ -117,26 +117,11 @@
     "male": "ولد",
     "female": "بنت"
   },
-  "invoices": {
-    "title": "الفاكتورات",
-    "new_invoice": "فاكتورة جديدة",
-    "invoice_number": "رقم الفاكتورة",
-    "dentist": "دكتور الأسنان",
-    "date": "التاريخ",
-    "due_date": "تاريخ الخلاص",
-    "amount": "المبلغ بلا ضريبة",
-    "tax": "الضريبة",
-    "total": "الكل",
-    "status": "الحالة",
-    "brouillon": "مسودة",
-    "envoyee": "تسولات",
-    "payee": "مخلوص",
-    "annulee": "ملغية",
+  "payment": {
     "paid": "مخلوص",
     "unpaid": "ما مخلوصش",
-    "partial": "خلاص جزئي",
-    "search_placeholder": "قلب على فاكتورة...",
-    "no_invoices": "ما كاينة حتى فاكتورة"
+    "mark_paid": "سجل كمخلوص",
+    "mark_unpaid": "سجل كما مخلوصش"
   },
   "settings": {
     "title": "الإعدادات",

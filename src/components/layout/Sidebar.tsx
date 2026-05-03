@@ -4,7 +4,6 @@ import {
   LayoutDashboard,
   ClipboardList,
   Stethoscope,
-  FileText,
   Settings,
   X,
 } from 'lucide-react'
@@ -14,7 +13,6 @@ const navItems = [
   { path: '/dashboard', icon: LayoutDashboard, key: 'nav.dashboard' },
   { path: '/orders', icon: ClipboardList, key: 'nav.orders' },
   { path: '/dentists', icon: Stethoscope, key: 'nav.dentists' },
-  { path: '/invoices', icon: FileText, key: 'nav.invoices' },
 ]
 
 interface SidebarProps {

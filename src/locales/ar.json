@@ -35,7 +35,7 @@
     "view_all": "عرض الكل",
     "new_order": "طلب جديد",
     "manage_dentists": "إدارة الأطباء",
-    "create_invoice": "إنشاء فاتورة"
+    "create_invoice": "طلب جديد"
   },
   "orders": {
     "title": "الطلبات",
@@ -117,26 +117,11 @@
     "male": "ذكر",
     "female": "أنثى"
   },
-  "invoices": {
-    "title": "الفواتير",
-    "new_invoice": "فاتورة جديدة",
-    "invoice_number": "رقم الفاتورة",
-    "dentist": "طبيب الأسنان",
-    "date": "التاريخ",
-    "due_date": "تاريخ الاستحقاق",
-    "amount": "المبلغ بدون ضريبة",
-    "tax": "الضريبة",
-    "total": "الإجمالي",
-    "status": "الحالة",
-    "brouillon": "مسودة",
-    "envoyee": "مُرسلة",
-    "payee": "مدفوعة",
-    "annulee": "ملغاة",
-    "paid": "مدفوعة",
-    "unpaid": "غير مدفوعة",
-    "partial": "جزئية",
-    "search_placeholder": "البحث عن فاتورة...",
-    "no_invoices": "لا توجد فواتير"
+  "payment": {
+    "paid": "مدفوع",
+    "unpaid": "غير مدفوع",
+    "mark_paid": "تحديد كمدفوع",
+    "mark_unpaid": "تحديد كغير مدفوع"
   },
   "settings": {
     "title": "الإعدادات",

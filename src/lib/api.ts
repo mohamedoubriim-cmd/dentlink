@@ -1,6 +1,6 @@
 import { isMockMode, supabase } from './supabase'
-import { mockDentists, mockOrders, mockInvoices, mockPatients } from './mockData'
-import type { Dentist, DentistUser, DentistStatus, Order, Invoice, InvoiceStatus, Patient, OrderStatus, OrderFile, UserProfile } from '../types'
+import { mockDentists, mockOrders, mockPatients } from './mockData'
+import type { Dentist, DentistUser, DentistStatus, Order, Patient, OrderStatus, OrderFile, UserProfile } from '../types'
 
 async function getLabId(): Promise<string> {
   const { data: { user } } = await supabase.auth.getUser()
@@ -418,110 +418,31 @@ async function getUserIdByEmail(email: string): Promise<string | null> {
   return data ?? null
 }
 
-// ── Invoices ──────────────────────────────────────────────────────────────────
+// ── Payment ───────────────────────────────────────────────────────────────────
 
-let localInvoices = [...mockInvoices]
-
-export async function getMyInvoices(): Promise<Invoice[]> {
-  if (isMockMode) return []
-  const { data, error } = await supabase
-    .from('invoices')
-    .select('*, dentist:dentists(*)')
-    .order('created_at', { ascending: false })
-  if (error) throw new Error(error.message)
-  return data || []
-}
-
-export async function getInvoices(): Promise<Invoice[]> {
-  if (isMockMode)
-    return [...localInvoices].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-  const { data } = await supabase.from('invoices').select('*, dentist:dentists(*)').order('created_at', { ascending: false })
-  return data || []
-}
-
-export async function getInvoice(id: string): Promise<Invoice | null> {
-  if (isMockMode) return localInvoices.find((i) => i.id === id) ?? null
-  const { data } = await supabase.from('invoices').select('*, dentist:dentists(*)').eq('id', id).single()
-  return data
-}
-
-export async function updateInvoiceStatus(id: string, status: InvoiceStatus): Promise<void> {
+export async function markOrderPaid(id: string): Promise<void> {
   if (isMockMode) {
-    const idx = localInvoices.findIndex((i) => i.id === id)
-    if (idx !== -1) localInvoices[idx] = { ...localInvoices[idx], status }
+    const idx = localOrders.findIndex((o) => o.id === id)
+    if (idx !== -1) localOrders[idx] = { ...localOrders[idx], payment_status: 'betald', paid_at: new Date().toISOString() }
     return
   }
-  // Uppdaterar bara statusen — ingen notis skickas. Notis skickas enbart via sendInvoice.
-  const { error } = await supabase.from('invoices').update({ status }).eq('id', id)
-  if (error) throw new Error(error.message)
-}
-
-export async function sendInvoice(id: string): Promise<void> {
-  if (isMockMode) {
-    const idx = localInvoices.findIndex((i) => i.id === id)
-    if (idx !== -1) localInvoices[idx] = { ...localInvoices[idx], status: 'envoyee' }
-    return
-  }
-  const { data: { user } } = await supabase.auth.getUser()
   const { error } = await supabase
-    .from('invoices')
-    .update({ status: 'envoyee', sent_at: new Date().toISOString(), sent_by: user?.id ?? null })
+    .from('orders')
+    .update({ payment_status: 'betald', paid_at: new Date().toISOString(), updated_at: new Date().toISOString() })
     .eq('id', id)
   if (error) throw new Error(error.message)
-
-  const { data: invoice } = await supabase
-    .from('invoices')
-    .select('invoice_number, total, dentist:dentists(email)')
-    .eq('id', id)
-    .single()
-
-  if (invoice) {
-    const dentistEmail = (invoice.dentist as any)?.email
-    if (dentistEmail) {
-      getUserIdByEmail(dentistEmail).then((userId) => {
-        if (userId) {
-          supabase.from('notifications').insert({
-            user_id: userId,
-            title: 'Nouvelle facture',
-            message: `Facture ${invoice.invoice_number} — ${invoice.total} MAD TTC`,
-            order_id: null,
-            invoice_id: id,
-            read: false,
-          })
-        }
-      }).catch(() => {})
-    }
-  }
 }
 
-export async function createInvoice(data: Omit<Invoice, 'id' | 'invoice_number' | 'created_at' | 'dentist' | 'sent_at' | 'sent_by'>): Promise<Invoice> {
+export async function markOrderUnpaid(id: string): Promise<void> {
   if (isMockMode) {
-    const invoice: Invoice = {
-      ...data,
-      id: Date.now().toString(),
-      invoice_number: `FAC-2025-${String(localInvoices.length + 13).padStart(3, '0')}`,
-      dentist: localDentists.find((d) => d.id === data.dentist_id),
-      created_at: new Date().toISOString(),
-    }
-    localInvoices.push(invoice)
-    return invoice
+    const idx = localOrders.findIndex((o) => o.id === id)
+    if (idx !== -1) localOrders[idx] = { ...localOrders[idx], payment_status: 'inte_betald', paid_at: null }
+    return
   }
-  const lab_id = await getLabId()
-  const year = new Date().getFullYear()
-  const { count } = await supabase.from('invoices').select('*', { count: 'exact', head: true })
-  const invoice_number = `FAC-${year}-${String((count ?? 0) + 1).padStart(3, '0')}`
-  const { data: created, error } = await supabase
-    .from('invoices')
-    .insert({ ...data, lab_id, invoice_number })
-    .select('*, dentist:dentists(*)')
-    .single()
-  if (error) throw new Error(error.message)
-  return created
-}
-
-export async function deleteInvoice(id: string): Promise<void> {
-  if (isMockMode) { localInvoices = localInvoices.filter((i) => i.id !== id); return }
-  const { error } = await supabase.from('invoices').delete().eq('id', id)
+  const { error } = await supabase
+    .from('orders')
+    .update({ payment_status: 'inte_betald', paid_at: null, updated_at: new Date().toISOString() })
+    .eq('id', id)
   if (error) throw new Error(error.message)
 }
 

@@ -35,7 +35,7 @@
     "view_all": "Voir tout",
     "new_order": "Nouvelle commande",
     "manage_dentists": "Gérer les dentistes",
-    "create_invoice": "Créer une facture"
+    "create_invoice": "Nouvelle commande"
   },
   "orders": {
     "title": "Commandes",
@@ -117,26 +117,11 @@
     "male": "Homme",
     "female": "Femme"
   },
-  "invoices": {
-    "title": "Factures",
-    "new_invoice": "Nouvelle facture",
-    "invoice_number": "N° facture",
-    "dentist": "Dentiste",
-    "date": "Date",
-    "due_date": "Échéance",
-    "amount": "Montant HT",
-    "tax": "TVA",
-    "total": "Total TTC",
-    "status": "Statut",
-    "brouillon": "Brouillon",
-    "envoyee": "Envoyée",
-    "payee": "Payée",
-    "annulee": "Annulée",
-    "paid": "Payée",
-    "unpaid": "Non payée",
-    "partial": "Partielle",
-    "search_placeholder": "Rechercher une facture...",
-    "no_invoices": "Aucune facture trouvée"
+  "payment": {
+    "paid": "Payé",
+    "unpaid": "Non payé",
+    "mark_paid": "Marquer payé",
+    "mark_unpaid": "Marquer non payé"
   },
   "settings": {
     "title": "Paramètres",

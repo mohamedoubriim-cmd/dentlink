@@ -85,6 +85,7 @@ export default function PortalNewOrder() {
         price: parseFloat(form.price) || 0,
         notes,
         status: 'pending',
+        payment_status: 'inte_betald',
       })
 
       // Upload files

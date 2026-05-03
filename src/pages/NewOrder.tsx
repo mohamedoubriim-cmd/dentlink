@@ -73,6 +73,7 @@ export default function NewOrder() {
         price: parseFloat(form.price) || 0,
         notes: form.notes,
         status: form.status,
+        payment_status: 'inte_betald',
       })
       navigate(`/orders/${order.id}`)
     } catch (err: any) {

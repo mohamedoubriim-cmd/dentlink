@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { Eye, Search, Trash2 } from 'lucide-react'
 import Card from './Card'
-import { StatusBadge } from './Badge'
+import { StatusBadge, PaymentBadge } from './Badge'
 import { useRTL } from '../../contexts/RTLContext'
 import type { Order, OrderStatus } from '../../types'
 
@@ -108,8 +108,9 @@ export default function OrdersTable({
                   {new Date(order.due_date).toLocaleDateString(isRTL ? 'ar-MA' : 'fr-FR')}
                 </p>
                 <p className="font-semibold text-slate-700">
-                  {order.price.toLocaleString()} {t('common.currency')}
+                  {order.price != null ? `${order.price.toLocaleString()} ${t('common.currency')}` : '—'}
                 </p>
+                <PaymentBadge status={order.payment_status} />
               </div>
               <div className={`flex gap-2 pt-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
                 <Link to={`${detailBasePath}/${order.id}`}>
@@ -163,8 +164,11 @@ export default function OrdersTable({
                   <td className={tdClass}>
                     {new Date(order.due_date).toLocaleDateString(isRTL ? 'ar-MA' : 'fr-FR')}
                   </td>
-                  <td className={`px-4 py-3 font-semibold text-slate-700 ${isRTL ? 'text-right' : ''}`}>
-                    {order.price.toLocaleString()} {t('common.currency')}
+                  <td className={`px-4 py-3 ${isRTL ? 'text-right' : ''}`}>
+                    <p className="font-semibold text-slate-700">
+                      {order.price != null ? `${order.price.toLocaleString()} ${t('common.currency')}` : '—'}
+                    </p>
+                    <PaymentBadge status={order.payment_status} />
                   </td>
                   <td className="px-4 py-3">
                     <StatusBadge status={order.status} label={t(`status.${order.status}`)} />

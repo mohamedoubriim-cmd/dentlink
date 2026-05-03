@@ -51,16 +51,7 @@ export function StatusBadge({ status, label }: { status: OrderStatus; label: str
   )
 }
 
-const invoiceStatusConfig: Record<string, { variant: BadgeProps['variant'] }> = {
-  brouillon: { variant: 'default'  },
-  envoyee:   { variant: 'warning'  },
-  payee:     { variant: 'success'  },
-  annulee:   { variant: 'danger'   },
-}
-
-export function InvoiceStatusBadge({ status, label }: { status: string; label: string }) {
-  const cfg = invoiceStatusConfig[status] ?? { variant: 'default' as const }
-  return (
-    <Badge variant={cfg.variant}>{label}</Badge>
-  )
+export function PaymentBadge({ status }: { status: 'inte_betald' | 'betald' }) {
+  if (status === 'betald') return <Badge variant="success">Payé</Badge>
+  return <Badge variant="warning">Non payé</Badge>
 }

@@ -8,7 +8,6 @@ interface Notification {
   title: string
   message: string
   order_id: string | null
-  invoice_id: string | null
   read: boolean
   created_at: string
 }
@@ -80,7 +79,6 @@ export default function NotificationBell({ orderBasePath = '/orders' }: Props) {
     }
     setOpen(false)
     if (n.order_id) navigate(`${orderBasePath}/${n.order_id}`)
-    else if (n.invoice_id) navigate(`/invoices/${n.invoice_id}/print`)
   }
 
   const timeAgo = (iso: string) => {

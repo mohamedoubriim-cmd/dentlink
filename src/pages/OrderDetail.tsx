@@ -1,13 +1,13 @@
 import { useEffect, useState, type JSX } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Calendar, User, Stethoscope, Package, Palette, Hash, Banknote, FileText, Download, FileImage, Box, File, Paperclip } from 'lucide-react'
+import { ArrowLeft, Calendar, User, Stethoscope, Package, Palette, Hash, Banknote, FileText, Download, FileImage, Box, File, Paperclip, CheckCircle2, XCircle } from 'lucide-react'
 import Card from '../components/ui/Card'
 import Button from '../components/ui/Button'
-import { StatusBadge } from '../components/ui/Badge'
+import { StatusBadge, PaymentBadge } from '../components/ui/Badge'
 import Select from '../components/ui/Select'
 import { PageSpinner } from '../components/ui/Spinner'
-import { getOrder, updateOrderStatus, updateTrackingNumber, updateOrderPrice, getFileDownloadUrl } from '../lib/api'
+import { getOrder, updateOrderStatus, updateTrackingNumber, updateOrderPrice, markOrderPaid, markOrderUnpaid, getFileDownloadUrl } from '../lib/api'
 import type { Order, OrderStatus, OrderFile } from '../types'
 import { useRTL } from '../contexts/RTLContext'
 
@@ -24,6 +24,7 @@ export default function OrderDetail() {
   const [savingTracking, setSavingTracking] = useState(false)
   const [price, setPrice] = useState('')
   const [savingPrice, setSavingPrice] = useState(false)
+  const [savingPayment, setSavingPayment] = useState(false)
 
   useEffect(() => {
     if (id) {
@@ -32,7 +33,7 @@ export default function OrderDetail() {
         if (data) {
           setNewStatus(data.status)
           setTrackingNumber(data.tracking_number ?? '')
-          setPrice(data.price > 0 ? String(data.price) : '')
+          setPrice(data.price != null && data.price > 0 ? String(data.price) : '')
         }
         setLoading(false)
       })
@@ -62,6 +63,22 @@ export default function OrderDetail() {
     await updateOrderPrice(order.id, newPrice)
     setOrder((prev) => prev ? { ...prev, price: newPrice } : prev)
     setSavingPrice(false)
+  }
+
+  const handleMarkPaid = async () => {
+    if (!order) return
+    setSavingPayment(true)
+    await markOrderPaid(order.id)
+    setOrder((prev) => prev ? { ...prev, payment_status: 'betald', paid_at: new Date().toISOString() } : prev)
+    setSavingPayment(false)
+  }
+
+  const handleMarkUnpaid = async () => {
+    if (!order) return
+    setSavingPayment(true)
+    await markOrderUnpaid(order.id)
+    setOrder((prev) => prev ? { ...prev, payment_status: 'inte_betald', paid_at: null } : prev)
+    setSavingPayment(false)
   }
 
   const statusOptions: OrderStatus[] = ['pending', 'in_progress', 'ready', 'delivered', 'cancelled']
@@ -156,7 +173,7 @@ export default function OrderDetail() {
             <DetailRow
               icon={<Banknote size={16} />}
               label={t('orders.price')}
-              value={`${order.price.toLocaleString()} ${t('common.currency')}`}
+              value={order.price != null ? `${order.price.toLocaleString()} ${t('common.currency')}` : '—'}
             />
           </div>
 
@@ -208,10 +225,42 @@ export default function OrderDetail() {
               loading={savingPrice}
               variant="outline"
               className="w-full mt-2"
-              disabled={parseFloat(price || '0') === order.price}
+              disabled={parseFloat(price || '0') === (order.price ?? 0)}
             >
               Enregistrer
             </Button>
+          </Card>
+
+          <Card>
+            <div className={`flex items-center justify-between mb-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+              <h3 className="text-sm font-semibold text-slate-700">Paiement</h3>
+              <PaymentBadge status={order.payment_status} />
+            </div>
+            {order.payment_status === 'betald' ? (
+              <Button
+                onClick={handleMarkUnpaid}
+                loading={savingPayment}
+                variant="outline"
+                className="w-full"
+                icon={<XCircle size={14} />}
+              >
+                Marquer non payé
+              </Button>
+            ) : (
+              <Button
+                onClick={handleMarkPaid}
+                loading={savingPayment}
+                className="w-full"
+                icon={<CheckCircle2 size={14} />}
+              >
+                Marquer payé
+              </Button>
+            )}
+            {order.paid_at && (
+              <p className="text-xs text-slate-400 mt-2 text-center">
+                Payé le {new Date(order.paid_at).toLocaleDateString(isRTL ? 'ar-MA' : 'fr-FR')}
+              </p>
+            )}
           </Card>
 
           <Card>
