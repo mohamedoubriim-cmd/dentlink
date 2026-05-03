@@ -192,17 +192,30 @@ export default function Invoices() {
   ]
 
   // Actions pour une ligne de facture
+  // Flux: brouillon → marquer payée (d'abord) → envoyer au dentiste (ensuite, comme reçu)
   const RowActions = ({ inv }: { inv: Invoice }) => {
     const busy = !!actionLoading
+
     if (inv.status === 'brouillon') return (
       <div className="flex items-center justify-end gap-1.5">
         <button
-          onClick={() => setSendDialog(inv)}
+          onClick={() => handleMarkPaid(inv)}
           disabled={busy}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-green-600 hover:bg-green-700 text-white disabled:opacity-40 transition-colors whitespace-nowrap"
         >
-          {actionLoading === inv.id + '-send'
+          {actionLoading === inv.id + '-paid'
             ? <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            : <CheckCircle2 size={13} />
+          }
+          Payée
+        </button>
+        <button
+          onClick={() => setSendDialog(inv)}
+          disabled={busy}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-blue-200 text-blue-700 hover:bg-blue-50 disabled:opacity-40 transition-colors whitespace-nowrap"
+        >
+          {actionLoading === inv.id + '-send'
+            ? <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
             : <Send size={13} />
           }
           Envoyer
@@ -233,7 +246,7 @@ export default function Invoices() {
             ? <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
             : <CheckCircle2 size={13} />
           }
-          Marquer payée
+          Payée
         </button>
         <button onClick={() => openPrint(inv.id)} className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors" title="Voir">
           <Eye size={15} />
@@ -252,6 +265,18 @@ export default function Invoices() {
 
     if (inv.status === 'payee') return (
       <div className="flex items-center justify-end gap-1.5">
+        <button
+          onClick={() => setSendDialog(inv)}
+          disabled={busy}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-blue-200 text-blue-700 hover:bg-blue-50 disabled:opacity-40 transition-colors whitespace-nowrap"
+          title="Envoyer comme reçu au dentiste"
+        >
+          {actionLoading === inv.id + '-send'
+            ? <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+            : <Send size={13} />
+          }
+          Envoyer
+        </button>
         <button onClick={() => downloadInvoicePdf(inv)} className="p-1.5 rounded-lg text-slate-400 hover:bg-primary-50 hover:text-primary-600 transition-colors" title="Télécharger PDF">
           <Download size={15} />
         </button>

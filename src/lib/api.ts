@@ -451,37 +451,9 @@ export async function updateInvoiceStatus(id: string, status: InvoiceStatus): Pr
     if (idx !== -1) localInvoices[idx] = { ...localInvoices[idx], status }
     return
   }
-  const { data: invoice } = await supabase
-    .from('invoices')
-    .select('invoice_number, total, dentist_id, dentist:dentists(email)')
-    .eq('id', id)
-    .single()
-
-  await supabase.from('invoices').update({ status }).eq('id', id)
-
-  if (invoice) {
-    const dentistEmail = (invoice.dentist as any)?.email
-    if (dentistEmail) {
-      const labels: Record<string, string> = {
-        payee:     'payée',
-        annulee:   'annulée',
-        envoyee:   'envoyée',
-        brouillon: 'en brouillon',
-      }
-      getUserIdByEmail(dentistEmail).then((userId) => {
-        if (userId) {
-          supabase.from('notifications').insert({
-            user_id: userId,
-            title: 'Statut de facture mis à jour',
-            message: `Facture ${invoice.invoice_number} (${invoice.total} MAD) — ${labels[status] ?? status}`,
-            order_id: null,
-            invoice_id: id,
-            read: false,
-          })
-        }
-      }).catch(() => { /* notification failure should not block status update */ })
-    }
-  }
+  // Uppdaterar bara statusen — ingen notis skickas. Notis skickas enbart via sendInvoice.
+  const { error } = await supabase.from('invoices').update({ status }).eq('id', id)
+  if (error) throw new Error(error.message)
 }
 
 export async function sendInvoice(id: string): Promise<void> {

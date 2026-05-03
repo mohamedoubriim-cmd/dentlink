@@ -32,7 +32,8 @@ export default function PortalInvoices() {
   useEffect(() => {
     getMyInvoices()
       .then((data) => {
-        setInvoices(data.filter((i) => i.status === 'envoyee' || i.status === 'payee'))
+        // Visa bara fakturor som skickats (sent_at sätts av sendInvoice)
+        setInvoices(data.filter((i) => i.sent_at != null))
         setLoading(false)
       })
       .catch((err) => { setError(err.message); setLoading(false) })
