@@ -94,7 +94,7 @@ export default function InvoicePrint() {
               {[
                 { label: 'Date', value: fmtDate(invoice.date) },
                 { label: 'Échéance', value: fmtDate(invoice.due_date) },
-                { label: 'Statut', value: invoice.status === 'paid' ? '✅ Payée' : invoice.status === 'partial' ? '⏳ Partiel' : '🔴 Impayée' },
+                { label: 'Statut', value: invoice.status === 'payee' ? '✅ Payée' : invoice.status === 'annulee' ? '❌ Annulée' : invoice.status === 'envoyee' ? '⏳ Envoyée' : '📄 Brouillon' },
               ].map(({ label, value }) => (
                 <div key={label} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
                   <span style={{ color: '#94a3b8' }}>{label}</span>

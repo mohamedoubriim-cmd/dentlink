@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { FileText, Download, CheckCircle2, Clock, AlertCircle } from 'lucide-react'
+import { FileText, Download, CheckCircle2, Clock } from 'lucide-react'
 import Card from '../../components/ui/Card'
 import { PageSpinner } from '../../components/ui/Spinner'
 import { getMyInvoices } from '../../lib/api'
@@ -8,20 +8,16 @@ import { downloadInvoicePdf } from '../../lib/invoicePdf'
 import type { Invoice } from '../../types'
 import { useRTL } from '../../contexts/RTLContext'
 
+// Dentisten ser aldrig brouillon (RLS blockerar det). envoyee visas som Impayée.
 function StatusPill({ status }: { status: Invoice['status'] }) {
-  if (status === 'paid') return (
+  if (status === 'payee') return (
     <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
       <CheckCircle2 size={11} /> Payée
     </span>
   )
-  if (status === 'partial') return (
-    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
-      <Clock size={11} /> Partiel
-    </span>
-  )
   return (
-    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
-      <AlertCircle size={11} /> Impayée
+    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
+      <Clock size={11} /> Impayée
     </span>
   )
 }
@@ -35,12 +31,15 @@ export default function PortalInvoices() {
 
   useEffect(() => {
     getMyInvoices()
-      .then((data) => { setInvoices(data); setLoading(false) })
+      .then((data) => {
+        setInvoices(data.filter((i) => i.status === 'envoyee' || i.status === 'payee'))
+        setLoading(false)
+      })
       .catch((err) => { setError(err.message); setLoading(false) })
   }, [])
 
   const totalUnpaid = invoices
-    .filter((i) => i.status !== 'paid')
+    .filter((i) => i.status === 'envoyee')
     .reduce((s, i) => s + i.total, 0)
 
   const fmt = (n: number) => n.toLocaleString('fr-MA', { minimumFractionDigits: 2 })
@@ -81,8 +80,8 @@ export default function PortalInvoices() {
             <Card key={inv.id} className="hover:shadow-md transition-shadow">
               <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
                 {/* Icon */}
-                <div className={`p-3 rounded-xl shrink-0 ${inv.status === 'paid' ? 'bg-green-50' : 'bg-red-50'}`}>
-                  <FileText size={20} className={inv.status === 'paid' ? 'text-green-600' : 'text-red-500'} />
+                <div className={`p-3 rounded-xl shrink-0 ${inv.status === 'payee' ? 'bg-green-50' : 'bg-amber-50'}`}>
+                  <FileText size={20} className={inv.status === 'payee' ? 'text-green-600' : 'text-amber-500'} />
                 </div>
 
                 {/* Info */}

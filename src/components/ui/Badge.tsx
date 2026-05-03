@@ -52,9 +52,10 @@ export function StatusBadge({ status, label }: { status: OrderStatus; label: str
 }
 
 const invoiceStatusConfig: Record<string, { variant: BadgeProps['variant'] }> = {
-  paid: { variant: 'success' },
-  unpaid: { variant: 'danger' },
-  partial: { variant: 'warning' },
+  brouillon: { variant: 'default'  },
+  envoyee:   { variant: 'warning'  },
+  payee:     { variant: 'success'  },
+  annulee:   { variant: 'danger'   },
 }
 
 export function InvoiceStatusBadge({ status, label }: { status: string; label: string }) {

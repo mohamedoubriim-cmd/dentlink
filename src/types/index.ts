@@ -97,6 +97,8 @@ export interface Order {
   updated_at: string
 }
 
+export type InvoiceStatus = 'brouillon' | 'envoyee' | 'payee' | 'annulee'
+
 export interface Invoice {
   id: string
   invoice_number: string
@@ -107,8 +109,10 @@ export interface Invoice {
   amount: number
   tax: number
   total: number
-  status: 'paid' | 'unpaid' | 'partial'
+  status: InvoiceStatus
   notes?: string
+  sent_at?: string | null
+  sent_by?: string | null
   created_at: string
 }
 

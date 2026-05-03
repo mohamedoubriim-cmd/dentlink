@@ -62,7 +62,7 @@ export default function Dashboard() {
 
   // Filtrera på resetAt om satt — bara fakturor skapade efter nollställningen räknas
   const paidSinceReset = invoices.filter(
-    (i) => i.status === 'paid' && (!resetAt || i.created_at >= resetAt)
+    (i) => i.status === 'payee' && (!resetAt || i.created_at >= resetAt)
   )
 
   const totalEarned = paidSinceReset.reduce((sum, i) => sum + i.total, 0)
@@ -121,13 +121,13 @@ export default function Dashboard() {
   monday.setDate(monday.getDate() - (monday.getDay() === 0 ? 6 : monday.getDay() - 1))
   const startOfWeekStr = monday.toISOString().slice(0, 10)
 
-  const paidAll = invoices.filter((i) => i.status === 'paid')
+  const paidAll = invoices.filter((i) => i.status === 'payee')
   const revenueToday = paidAll.filter((i) => i.date === todayStr).reduce((s, i) => s + i.total, 0)
   const revenueWeek  = paidAll.filter((i) => i.date >= startOfWeekStr).reduce((s, i) => s + i.total, 0)
   const revenueMonth = paidAll.filter((i) => i.date.startsWith(thisMonth)).reduce((s, i) => s + i.total, 0)
 
   const unpaidInvoices = invoices
-    .filter((i) => i.status === 'unpaid' || i.status === 'partial')
+    .filter((i) => i.status === 'brouillon' || i.status === 'envoyee')
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
 
   const daysSince = (d: string) => Math.floor((Date.now() - new Date(d).getTime()) / 86_400_000)
